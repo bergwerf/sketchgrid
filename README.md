@@ -1,3 +1,4 @@
 SketchGrid
 ==========
-Make technical sketches to illustrate mathematics or physics problems.
+A web based sketcher to make drawing technical sketches to illustrate
+mathematics or physics problems easier.

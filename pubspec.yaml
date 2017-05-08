@@ -1,7 +1,7 @@
 name:           sketchgrid
 version:        0.0.0
 author:         Herman Bergwerf <hermanbergwerf@gmail.com>
-description:    Sketch illustrations for mathematics or physics problems.
+description:    Sketcher for technical illustrations.
 homepage:       https://github.com/eqdb/sketchgrid
 environment:
   sdk:          '>=1.8.0 <2.0.0'
