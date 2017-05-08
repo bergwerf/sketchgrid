@@ -1,0 +1,35 @@
+// Copyright (c) 2017, Herman Bergwerf. All rights reserved.
+// Use of this source code is governed by an AGPL-3.0-style license
+// that can be found in the LICENSE file.
+
+body {
+  display: grid;
+  grid-template: 1fr 30em 1fr / 1fr 42em 1fr;
+  background: #eee;
+}
+
+.sketchgrid-container {
+  grid-row: 2;
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+
+  border-radius: .3em;
+  background: #fff;
+  box-shadow: 0 0 1em #ccc;
+}
+
+.sketchgrid-toolset {
+  text-align: center;
+  margin: .3em;
+}
+
+.sketchgrid-canvas {
+  flex: 1;
+  border-top: 1px solid #eee;
+}
+
+.dropdown > i {
+  margin-top: -4px;
+  margin-right: -10px;
+}
