@@ -190,6 +190,8 @@ class GridlineThing implements SketchThing {
   }
 }
 
+enum SketchTool { line, arc, gridline }
+
 class SketchGrid {
   final CanvasElement canvas;
   final things = new List<SketchThing>();

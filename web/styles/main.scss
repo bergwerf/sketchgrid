@@ -4,7 +4,7 @@
 
 body {
   display: grid;
-  grid-template: 1fr 30em 1fr / 1fr 42em 1fr;
+  grid-template: 1fr 32em 1fr / 1fr 45em 1fr;
   background: #eee;
 }
 
@@ -26,6 +26,11 @@ body {
 .sketchgrid-canvas {
   flex: 1;
   border-top: 1px solid #eee;
+}
+
+.tool-selected {
+  background: #333 !important;
+  color: #eee !important;
 }
 
 .dropdown > i {

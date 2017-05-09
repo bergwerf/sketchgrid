@@ -12,21 +12,21 @@
   <body>
     <div class="sketchgrid-container">
       <div class="sketchgrid-toolset">
-        <button class="mdl-button mdl-js-button mdl-js-ripple-effect">Line</button>
-        <button class="mdl-button mdl-js-button mdl-js-ripple-effect">Arc</button>
-        <button class="mdl-button mdl-js-button mdl-js-ripple-effect">Gridline</button>
-        <button id="gridline-type" class="dropdown mdl-button mdl-js-button mdl-js-ripple-effect">
+        <button id="gridline-type"
+            class="dropdown mdl-button mdl-js-button mdl-js-ripple-effect">
           <i class="material-icons">arrow_drop_down</i>
         </button>
         <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect"
             for="gridline-type">
         </ul>
-        <button id="gridline-constraint" class="dropdown mdl-button mdl-js-button mdl-js-ripple-effect">
+        <button id="gridline-constraint"
+            class="dropdown mdl-button mdl-js-button mdl-js-ripple-effect">
           <i class="material-icons">arrow_drop_down</i>
         </button>
         <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect"
             for="gridline-constraint">
         </ul>
+        <button id="btn-clear" class="mdl-button mdl-js-button mdl-js-ripple-effect">Clear grid</button>
       </div>
       <canvas id="sketcharea" class="sketchgrid-canvas"></canvas>
     </div>
