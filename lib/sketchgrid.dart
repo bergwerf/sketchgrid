@@ -117,15 +117,36 @@ class SketchGrid {
     final cursor = getPointer(e);
 
     // Get all closest points and get closest one.
-    final points = things.map((t) => t.closestPoint(cursor));
+    final points = things.map((t) => t.closestPoint(cursor)).toList();
 
     // Get closest point.
+    var targetIdx = -1;
     num smallestDistance = 1000;
-    for (final point in points) {
-      final distance = point.distanceToSquared(cursor);
+    for (var i = 0; i < points.length; i++) {
+      final distance = points[i].item1.distanceToSquared(cursor);
       if (distance < smallestDistance) {
-        target = point;
+        targetIdx = i;
         smallestDistance = distance;
+      }
+    }
+
+    // If another point is very close to the current one, we can compute the
+    // intersection between the two origin curves. If there turns out to be no
+    // intersection, keep trying the other points etc.
+    if (targetIdx != -1) {
+      target = points[targetIdx].item1;
+
+      for (var i = 0; i < points.length; i++) {
+        if (i == targetIdx) {
+          continue;
+        }
+        if (target.distanceTo(points[i].item1) < 0.2) {
+          final intersect = thingIntersection(things[targetIdx],
+              points[targetIdx].item2, things[i], points[i].item2, cursor);
+          if (intersect != null) {
+            target = intersect;
+          }
+        }
       }
     }
 

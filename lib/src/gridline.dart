@@ -57,7 +57,7 @@ class GridlineThing implements SketchThing {
   }
 
   @override
-  Vector2 closestPoint(Vector2 to) {
+  Tuple2<Vector2, int> closestPoint(Vector2 to) {
     // Get vector from this ray origin to [to].
     final relTo = to - ray.origin;
 
@@ -66,11 +66,31 @@ class GridlineThing implements SketchThing {
 
     // If this is a repeating line, compute which line is closest to the point.
     if (repeat) {
-      final which = (proj.distanceTo(to) / distance + .5).floor();
-      final direction = to - proj;
-      return proj + (direction / direction.length) * which.toDouble();
+      final offset = (proj.distanceTo(to) / distance + .5).floor();
+      final offsetV = perpendicular();
+      final normalDirection = (to - proj).angleToSigned(offsetV).abs() < 1;
+      final index = normalDirection ? offset : -offset;
+      final target = proj + offsetV * index.toDouble();
+      return new Tuple2<Vector2, int>(target, index);
     } else {
-      return proj;
+      return new Tuple2<Vector2, int>(proj, 0);
     }
+  }
+
+  /// Get ray at [i].
+  Ray2 getRay(int i) {
+    return new Ray2(ray.origin + perpendicular() * i.toDouble(), ray.direction);
+  }
+}
+
+/// Compute intersection point between two things at the given path indices
+/// nearest to the given point.
+Vector2 thingIntersection(
+    SketchThing a, int aIdx, SketchThing b, int bIdx, Vector2 nearest) {
+  if (a is GridlineThing && b is GridlineThing) {
+    // Compute intersection.
+    return a.getRay(aIdx).intersectRay(b.getRay(bIdx));
+  } else {
+    throw new UnimplementedError('thing not implemented');
   }
 }

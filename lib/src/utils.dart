@@ -19,5 +19,5 @@ String rgba(Vector4 c) => [
 
 /// Compute vector projection of [a] on [v].
 Vector2 vectorProjection(Vector2 a, Vector2 v) {
-  return v * (a.dot(v) / v.length);
+  return (v / v.length) * (a.dot(v) / v.length);
 }

@@ -37,6 +37,32 @@ class Ray2 {
     }
   }
 
+  Vector2 intersectRay(Ray2 other) {
+    if (direction.cross(other.direction) == 0) {
+      return null;
+    } else if (direction.x == 0 && other.direction.y == 0) {
+      return vec2(origin.x, other.origin.y);
+    } else if (direction.y == 0 && other.direction.x == 0) {
+      return vec2(other.origin.x, origin.y);
+    } else if (direction.x == 0 || other.direction.x == 0) {
+      // Evaluate with respect to y, i.e. x = ay + b.
+      final a1 = direction.x / direction.y;
+      final a2 = other.direction.x / other.direction.y;
+      final b1 = origin.x - (a1 * origin.y);
+      final b2 = other.origin.x - (a2 * other.origin.y);
+      final y = (b2 - b1) / (a1 - a2);
+      return vec2(a1 * y + b1, y);
+    } else {
+      // Evaluate with respect to x, i.e. y = ax + b.
+      final a1 = direction.y / direction.x;
+      final a2 = other.direction.y / other.direction.x;
+      final b1 = origin.y - (a1 * origin.x);
+      final b2 = other.origin.y - (a2 * other.origin.x);
+      final x = (b2 - b1) / (a1 - a2);
+      return vec2(x, a1 * x + b1);
+    }
+  }
+
   /// Return translated ray.
   Ray2 translate(Vector2 translation) {
     return new Ray2(origin + translation, direction);

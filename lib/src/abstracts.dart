@@ -27,5 +27,5 @@ abstract class SketchThing {
   void draw(SketchAPI sketch);
 
   /// Return point that is closest to [to].
-  Vector2 closestPoint(Vector2 to);
+  Tuple2<Vector2, int> closestPoint(Vector2 to);
 }
