@@ -63,13 +63,13 @@ class CanvasAPI implements SketchAPI {
   }
 
   @override
-  void drawLine(Vector2 from, Vector2 to, String style) {
+  void drawLine(Vector2 from, Vector2 to, String style, [bool exact = false]) {
     _drawPath(style, () {
-      final _from = _transform(from), _to = _transform(to);
+      final _from = _transform(from, !exact), _to = _transform(to, !exact);
 
       // If line is almost horizontal or vertical, and the line width is thin,
       // use this code to make it pixel perfect.
-      if (ctx.lineWidth < 5 && ctx.lineWidth % 2 != 0) {
+      if (!exact && ctx.lineWidth < 5 && ctx.lineWidth % 2 != 0) {
         if ((_from.x - _to.x).abs() < 5) {
           _from.x += .5;
           _to.x += .5;

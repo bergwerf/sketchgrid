@@ -49,6 +49,5 @@ class LineSegment implements LineThing {
   @override
   bool containsIntersection(point) => bbox.containsVector2(point);
 
-  Aabb2 get bbox => new Aabb2.centerAndHalfExtents(
-      (from + to) / 2.0, ((to - from) / 2.0)..absolute());
+  Aabb2 get bbox => getLineBBox(from, to);
 }

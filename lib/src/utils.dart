@@ -21,3 +21,11 @@ String rgba(Vector4 c) => [
 Vector2 vectorProjection(Vector2 a, Vector2 v) {
   return (v / v.length) * (a.dot(v) / v.length);
 }
+
+/// Get bounding box around line between [from] and [to].
+Aabb2 getLineBBox(Vector2 from, Vector2 to) {
+  final extents = ((to - from) / 2.0)..absolute();
+  final bbox = new Aabb2.centerAndHalfExtents(
+      (from + to) / 2.0, vec2(max(extents.x, 0.1), max(extents.y, 0.1)));
+  return bbox;
+}

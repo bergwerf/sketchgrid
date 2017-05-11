@@ -177,7 +177,7 @@ class SketchGrid {
           things.add(new LineSegment(from, to));
         } else if (tool == SketchTool.gridline) {
           final ray = new Ray2.fromTo(from, to);
-          things.add(new GridLine(ray));
+          things.add(new GridLine(ray, true));
         }
 
         redraw();

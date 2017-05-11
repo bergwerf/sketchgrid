@@ -16,7 +16,7 @@ class SketchStyle {
 abstract class SketchAPI {
   Tuple2<Vector2, Vector2> projEdge(Ray2 ray);
   void drawPointHighlight(Vector2 point);
-  void drawLine(Vector2 from, Vector2 to, String style);
+  void drawLine(Vector2 from, Vector2 to, String style, [bool exact]);
   void drawArc(
       Vector2 center, num radius, num startAngle, num endAngle, String style);
 }

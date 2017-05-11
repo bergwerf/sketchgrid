@@ -19,9 +19,9 @@ class GridLine implements LineThing {
   final Ray2 ray;
 
   final bool ruler;
-  final num rulerSteps;
+  final num stepSize;
 
-  GridLine(this.ray, [this.ruler = false, this.rulerSteps = 1]);
+  GridLine(this.ray, [this.ruler = false, this.stepSize = 1]);
 
   @override
   int get drawPriority => 2;
@@ -32,18 +32,45 @@ class GridLine implements LineThing {
     if (proj != null) {
       sk.drawLine(proj.item1, proj.item2, 'grid');
     }
+    if (ruler) {
+      final bbox = getLineBBox(proj.item1, proj.item2);
+      final o = ray.perpendicular() * 0.1;
+
+      // Draw tiny red points along grid line.
+      var v = ray.origin.clone();
+      while (bbox.containsVector2(v)) {
+        sk.drawLine(v + o, v - o, 'grid', true);
+        v += ray.direction * stepSize;
+      }
+      v = ray.origin.clone() - ray.direction;
+      while (bbox.containsVector2(v)) {
+        sk.drawLine(v + o, v - o, 'grid', true);
+        v -= ray.direction * stepSize;
+      }
+    }
   }
 
   @override
-  MagnetPoint attract(Vector2 to) {
-    // Get vector from this ray origin to [to].
-    final relTo = to - ray.origin;
+  MagnetPoint attract(Vector2 target) {
+    // Project target on ray.
+    final proj = ray.project(target);
 
-    // Project [relTo] on ray.
-    final proj = ray.origin + vectorProjection(relTo, ray.direction);
+    // If this is a ruler, check if the projection is close enough to an
+    // indicator.
+    if (ruler) {
+      final distance = ray.origin.distanceTo(proj);
+      final idx = (distance / stepSize).round() *
+          ((proj - ray.origin).angleToSigned(ray.direction).abs() < 1 ? 1 : -1);
+
+      final v = ray.at(idx * stepSize);
+      final vDist = v.distanceTo(target);
+      if (vDist < MagnetPoint.strongMagnetDistance) {
+        return new MagnetPoint(v, vDist, MagnetPoint.priorityHigh);
+      }
+    }
 
     // Check if the point is close enough.
-    final distance = proj.distanceTo(to);
+    final distance = proj.distanceTo(target);
     if (distance < MagnetPoint.magnetDistance) {
       return new MagnetPoint(proj, distance, MagnetPoint.priorityNormal);
     } else {

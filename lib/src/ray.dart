@@ -8,11 +8,15 @@ part of sketchgrid;
 class Ray2 {
   final Vector2 origin, direction;
 
-  Ray2(this.origin, this.direction);
+  factory Ray2(Vector2 origin, Vector2 direction) {
+    return new Ray2._(origin, direction / direction.length);
+  }
 
   factory Ray2.fromTo(Vector2 from, Vector2 to) {
     return new Ray2(from, to - from);
   }
+
+  Ray2._(this.origin, this.direction);
 
   Tuple2<Vector2, Vector2> intersectAabb(Aabb2 aabb) {
     final result = new List<Vector2>();
@@ -71,5 +75,26 @@ class Ray2 {
   /// Return translated ray.
   Ray2 translate(Vector2 translation) {
     return new Ray2(origin + translation, direction);
+  }
+
+  /// Get perpendicular unit vector in ray direction.
+  Vector2 perpendicular() {
+    // <a b>*<x y> = 0 --> ax + by = 0, x + by = 0, b = -x/y
+    if (direction.y == 0) {
+      return vec2(0, 1);
+    } else {
+      final v = vec2(1, -direction.x / direction.y);
+      return v / v.length;
+    }
+  }
+
+  /// Get point at [distance] from origin.
+  Vector2 at(num distance) {
+    return origin + direction * distance;
+  }
+
+  /// Project [point] on ray.
+  Vector2 project(Vector2 point) {
+    return origin + vectorProjection(point - origin, direction);
   }
 }
