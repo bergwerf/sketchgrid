@@ -126,6 +126,18 @@ class SketchGrid {
     return vec2(v3.x, v3.y);
   }
 
+  /// Compute all intersections between [things].
+  /// This function could be optimized in several ways, such as caching.
+  List<Vector2> computeAllIntersections() {
+    final intersections = new List<Vector2>();
+    for (var i = 0; i < things.length; i++) {
+      for (var j = i + 1; j < things.length; j++) {
+        intersections.addAll(thingIntersection(things[i], things[j]));
+      }
+    }
+    return intersections;
+  }
+
   /// Get attraction points for the given [cursor] point.
   List<Tuple2<MagnetPoint, int>> getAttractionPoints(Vector2 cursor) {
     final m = new List<Tuple2<MagnetPoint, int>>();
@@ -153,12 +165,7 @@ class SketchGrid {
     final cursor = getPointer(e);
 
     // Compute all intersections.
-    final inter = new List<Vector2>();
-    for (var i = 0; i < things.length; i++) {
-      for (var j = i + 1; j < things.length; j++) {
-        inter.addAll(thingIntersection(things[i], things[j]));
-      }
-    }
+    final inter = computeAllIntersections();
 
     // Check if any intersection is within magnet distance.
     final interDistance = new List<Tuple2<num, int>>.generate(inter.length,
