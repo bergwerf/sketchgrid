@@ -29,3 +29,16 @@ Aabb2 getLineBBox(Vector2 from, Vector2 to) {
       (from + to) / 2.0, vec2(max(extents.x, 0.1), max(extents.y, 0.1)));
   return bbox;
 }
+
+/// Get last [n] points from [list]. Also remove them if [remove] it true.
+List<T> getNPoints<T>(int n, List<T> list, bool remove) {
+  if (list.length < n) {
+    throw new RangeError('list is too short');
+  }
+
+  if (remove) {
+    return new List<T>.generate(n, (i) => list.removeLast()).reversed.toList();
+  } else {
+    return new List<T>.generate(n, (i) => list[list.length - n + i]);
+  }
+}

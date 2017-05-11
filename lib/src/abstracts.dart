@@ -56,3 +56,46 @@ abstract class LineThing implements SketchThing {
   /// For a given intersection point on the ray, check if it is on this line.
   bool containsIntersection(Vector2 point);
 }
+
+/// Sketch tool interface
+abstract class SketchTool<T extends SketchThing> {
+  final points = new List<Vector2>();
+
+  /// Get a sketchthing from the given points.
+  T createThing(List<Vector2> points, bool remove);
+
+  /// Draw any tool related stuff.
+  void draw(SketchAPI sk, Vector2 hoveredPoint) {
+    // Collect list of all points.
+    final allPoints = new List<Vector2>.from(points);
+    if (hoveredPoint != null) {
+      allPoints.add(hoveredPoint);
+    }
+
+    // Draw preview of thing.
+    try {
+      final preview = createThing(allPoints, false);
+      if (preview != null) {
+        preview.draw(sk);
+      }
+    } catch (e) {
+      // This is a bit of a hack, but it makes other code simpler.
+    } finally {
+      // Draw all points.
+      allPoints.forEach((v) => sk.drawPointHighlight(v));
+    }
+  }
+
+  /// The user clicked a point.
+  void addPoint(Vector2 point, List<SketchThing> things) {
+    points.add(point);
+    try {
+      final thing = createThing(points, true);
+      if (thing != null) {
+        things.add(thing);
+      }
+    } catch (e) {
+      // This is a bit of a hack, but it makes other code simpler.
+    }
+  }
+}

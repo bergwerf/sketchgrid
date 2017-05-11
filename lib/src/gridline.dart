@@ -4,16 +4,6 @@
 
 part of sketchgrid;
 
-enum GridlineConstraint {
-  twoPoints,
-  horizontal,
-  vertical,
-  parallel,
-  perpendicular,
-  singleTangent,
-  doubleTangent
-}
-
 class GridLine implements LineThing {
   @override
   final Ray2 ray;
@@ -36,7 +26,7 @@ class GridLine implements LineThing {
       final bbox = getLineBBox(proj.item1, proj.item2);
       final o = ray.perpendicular() * 0.1;
 
-      // Draw tiny red points along grid line.
+      // Draw ruler indicators.
       var v = ray.origin.clone();
       while (bbox.containsVector2(v)) {
         sk.drawLine(v + o, v - o, 'grid', true);

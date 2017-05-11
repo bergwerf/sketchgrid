@@ -18,8 +18,7 @@ part 'src/canvas_api.dart';
 part 'src/gridline.dart';
 part 'src/linesegment.dart';
 part 'src/intersections.dart';
-
-enum SketchTool { line, arc, gridline }
+part 'src/tools.dart';
 
 class SketchGrid {
   final CanvasElement canvas;
@@ -32,19 +31,22 @@ class SketchGrid {
   bool scheduledRedraw = false;
   num gridSize = 11;
 
-  /// Target point for selection
-  Vector2 target;
+  /// Hovered point
+  Vector2 hoveredPoint;
 
   /// Active tool
-  var tool = SketchTool.line;
-
-  /// Clicked target points
-  final storedTargets = new List<Vector2>();
+  SketchTool tool;
 
   SketchGrid(this.canvas) {
     // Setup event listening.
     canvas.onMouseMove.listen(onMouseMove);
+    canvas.onMouseDown.listen(onMouseDown);
     canvas.onMouseUp.listen(onMouseUp);
+    canvas.onContextMenu.listen((e) => e.preventDefault());
+    canvas.onMouseLeave.listen((_) {
+      hoveredPoint = null;
+      redraw();
+    });
 
     // Setup drawing.
     ctx = canvas.getContext('2d');
@@ -85,19 +87,19 @@ class SketchGrid {
     ctx.clearRect(0, 0, w, h);
 
     // Draw all things.
-    final api = new CanvasAPI(ctx, transformation, vec2(w, h), defaultStyles);
+    final sk = new CanvasAPI(ctx, transformation, vec2(w, h), defaultStyles);
     things.sort((a, b) => b.drawPriority - a.drawPriority);
     for (final thing in things) {
-      thing.draw(api);
+      thing.draw(sk);
     }
 
     // Draw target point.
-    if (target != null) {
-      api.drawPointHighlight(target);
+    if (hoveredPoint != null) {
+      sk.drawPointHighlight(hoveredPoint);
     }
 
-    for (final point in storedTargets) {
-      api.drawPointHighlight(point);
+    if (tool != null) {
+      tool.draw(sk, hoveredPoint);
     }
   }
 
@@ -140,7 +142,7 @@ class SketchGrid {
         (i) => new Tuple2<num, int>(inter[i].distanceTo(cursor), i)).toList();
     final minInter = minBy(interDistance, (e) => e.item1);
     if (minInter != null && minInter.item1 < MagnetPoint.strongMagnetDistance) {
-      target = inter[minInter.item2];
+      hoveredPoint = inter[minInter.item2];
     } else {
       // Get all magnet points.
       final m = things.map((t) => t.attract(cursor)).toList();
@@ -156,30 +158,28 @@ class SketchGrid {
       });
 
       if (m.isNotEmpty) {
-        target = m.first.point;
+        hoveredPoint = m.first.point;
       } else {
-        target = cursor;
+        hoveredPoint = cursor;
       }
     }
 
     redraw();
   }
 
+  void onMouseDown(MouseEvent e) {
+    e.preventDefault();
+    if (e.button == 2) {
+      tool.points.clear();
+      redraw();
+    }
+  }
+
   void onMouseUp(MouseEvent e) {
-    if (target != null) {
-      storedTargets.add(target);
-
-      if (storedTargets.length > 1) {
-        final from = storedTargets.removeLast(),
-            to = storedTargets.removeLast();
-
-        if (tool == SketchTool.line) {
-          things.add(new LineSegment(from, to));
-        } else if (tool == SketchTool.gridline) {
-          final ray = new Ray2.fromTo(from, to);
-          things.add(new GridLine(ray, true));
-        }
-
+    e.preventDefault();
+    if (e.button == 0) {
+      if (hoveredPoint != null && tool != null) {
+        tool.addPoint(hoveredPoint, things);
         redraw();
       }
     }

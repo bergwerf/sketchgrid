@@ -7,15 +7,21 @@ import 'dart:async';
 
 import 'package:sketchgrid/sketchgrid.dart';
 
+final lineSegmentTool = new LineSegmentTool();
+final gridLineTool = new GridLineTool();
+
+enum SketchToolType { linesegment, gridline }
+final toolButtons = {
+  SketchToolType.linesegment: 'Line',
+  SketchToolType.gridline: 'Gridline'
+};
 final tools = {
-  SketchTool.gridline: 'Gridline',
-  SketchTool.arc: 'Arc',
-  SketchTool.line: 'Line'
+  SketchToolType.linesegment: lineSegmentTool,
+  SketchToolType.gridline: gridLineTool
 };
 
-final gridlineRuler = {'Normal': false, 'Ruler': true};
-
-final gridlineConstraints = {
+final gridLineRuler = {'Normal': false, 'Ruler': true};
+final gridLineConstraints = {
   'Two points': GridlineConstraint.twoPoints,
   'Horizontal': GridlineConstraint.horizontal,
   'Vertical': GridlineConstraint.vertical,
@@ -32,7 +38,7 @@ void main() {
 
   // Stream that indicates if the gridline tool is selected.
   // ignore: close_sinks
-  final gridlineIsOn = new StreamController<bool>.broadcast();
+  final gridLineIsOn = new StreamController<bool>.broadcast();
 
   // Setup canvas.
   final sketch = new SketchGrid(querySelector('#sketcharea'));
@@ -41,19 +47,20 @@ void main() {
   final toolset = querySelector('.sketchgrid-toolset');
 
   // Tool button handling.
-  final buttons = new Map<SketchTool, ButtonElement>();
-  final setTool = (SketchTool tool) {
-    sketch.tool = tool;
-    gridlineIsOn.add(tool == SketchTool.gridline);
+  final buttons = new Map<SketchToolType, ButtonElement>();
+  final setTool = (SketchToolType tool) {
+    sketch.tool = tools[tool];
+    sketch.tool.points.clear();
+    gridLineIsOn.add(tool == SketchToolType.gridline);
     buttons.values.forEach((btn) => btn.classes.removeAll(selectedToolStyle));
     buttons[tool].classes.addAll(selectedToolStyle);
   };
 
   // Create tool buttons.
-  tools.forEach((key, name) {
+  toolButtons.keys.toList().reversed.forEach((key) {
     final button = new ButtonElement()
       ..classes.addAll(buttonStyle)
-      ..text = name;
+      ..text = toolButtons[key];
     button.onClick.listen((_) {
       setTool(key);
     });
@@ -65,17 +72,20 @@ void main() {
   setupMenu(
       querySelector('#gridline-type'),
       querySelector('#gridline-type + ul'),
-      gridlineRuler,
-      gridlineIsOn.stream,
-      (type) {});
+      gridLineRuler,
+      gridLineIsOn.stream, (isOn) {
+    gridLineTool.ruler = isOn;
+  });
   setupMenu(
       querySelector('#gridline-constraint'),
       querySelector('#gridline-constraint + ul'),
-      gridlineConstraints,
-      gridlineIsOn.stream,
-      (constraint) {});
+      gridLineConstraints,
+      gridLineIsOn.stream, (constraint) {
+    gridLineTool.constraint = constraint;
+    gridLineTool.points.clear();
+  });
 
-  setTool(SketchTool.line);
+  setTool(SketchToolType.gridline);
 }
 
 void setupMenu<T>(ButtonElement button, UListElement ul, Map<String, T> values,
