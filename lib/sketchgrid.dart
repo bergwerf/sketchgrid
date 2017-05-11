@@ -8,6 +8,7 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:tuple/tuple.dart';
+import 'package:collection/collection.dart';
 import 'package:vector_math/vector_math.dart';
 
 part 'src/utils.dart';
@@ -16,6 +17,7 @@ part 'src/abstracts.dart';
 part 'src/canvas_api.dart';
 part 'src/gridline.dart';
 part 'src/linesegment.dart';
+part 'src/intersections.dart';
 
 enum SketchTool { line, arc, gridline }
 
@@ -48,10 +50,6 @@ class SketchGrid {
     ctx = canvas.getContext('2d');
     window.onResize.listen((_) => resize());
     resize();
-
-    things
-      ..add(new GridlineThing(new Ray2(vec2(0, 0), vec2(1, 0)), true, .7))
-      ..add(new GridlineThing(new Ray2(vec2(0, 0), vec2(0, 1)), true, .7));
   }
 
   void resize() {
@@ -129,44 +127,38 @@ class SketchGrid {
   void onMouseMove(MouseEvent e) {
     final cursor = getPointer(e);
 
-    // Get all closest points and get closest one.
-    final points = things.map((t) => t.closestPoint(cursor)).toList();
-    points.removeWhere((p) => p == null);
-
-    // Get closest point.
-    var targetIdx = -1;
-    num smallestDistance = 1000;
-    for (var i = 0; i < points.length; i++) {
-      final distance = points[i].item1.distanceToSquared(cursor);
-      if (distance < smallestDistance) {
-        targetIdx = i;
-        smallestDistance = distance;
+    // Compute all intersections.
+    final inter = new List<Vector2>();
+    for (var i = 0; i < things.length; i++) {
+      for (var j = i + 1; j < things.length; j++) {
+        inter.addAll(thingIntersection(things[i], things[j]));
       }
     }
 
-    // If another point is very close to the current one, we can compute the
-    // intersection between the two origin curves. If there turns out to be no
-    // intersection, keep trying the other points etc.
-    if (targetIdx != -1) {
-      var targetIsIntersection = false;
-      target = points[targetIdx].item1;
+    // Check if any intersection is within magnet distance.
+    final interDistance = new List<Tuple2<num, int>>.generate(inter.length,
+        (i) => new Tuple2<num, int>(inter[i].distanceTo(cursor), i)).toList();
+    final minInter = minBy(interDistance, (e) => e.item1);
+    if (minInter != null && minInter.item1 < MagnetPoint.strongMagnetDistance) {
+      target = inter[minInter.item2];
+    } else {
+      // Get all magnet points.
+      final m = things.map((t) => t.attract(cursor)).toList();
+      m.removeWhere((p) => p == null);
+      m.sort((a, b) {
+        if (a.priority < b.priority) {
+          return -1;
+        } else if (a.priority > b.priority) {
+          return 1;
+        } else {
+          return a.cursorDistance - b.cursorDistance;
+        }
+      });
 
-      for (var i = 0; i < points.length; i++) {
-        if (i == targetIdx) {
-          continue;
-        }
-        if (target.distanceTo(points[i].item1) < 0.3) {
-          final intersect = thingIntersection(things[targetIdx],
-              points[targetIdx].item2, things[i], points[i].item2, cursor);
-          if (intersect != null &&
-              ((!targetIsIntersection &&
-                      intersect.distanceToSquared(cursor) < 0.3) ||
-                  intersect.distanceToSquared(cursor) <
-                      target.distanceToSquared(cursor))) {
-            target = intersect;
-            targetIsIntersection = true;
-          }
-        }
+      if (m.isNotEmpty) {
+        target = m.first.point;
+      } else {
+        target = cursor;
       }
     }
 
@@ -182,10 +174,10 @@ class SketchGrid {
             to = storedTargets.removeLast();
 
         if (tool == SketchTool.line) {
-          things.add(new LineSegmentThing(from, to));
+          things.add(new LineSegment(from, to));
         } else if (tool == SketchTool.gridline) {
           final ray = new Ray2.fromTo(from, to);
-          things.add(new GridlineThing(ray));
+          things.add(new GridLine(ray));
         }
 
         redraw();

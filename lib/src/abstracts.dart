@@ -21,6 +21,21 @@ abstract class SketchAPI {
       Vector2 center, num radius, num startAngle, num endAngle, String style);
 }
 
+/// Magnet point for event handling
+class MagnetPoint {
+  static num magnetDistance = 0.2;
+  static num strongMagnetDistance = 0.3;
+
+  static const priorityNormal = 2;
+  static const priorityHigh = 1;
+
+  final Vector2 point;
+  final num cursorDistance;
+  final int priority;
+
+  MagnetPoint(this.point, this.cursorDistance, this.priority);
+}
+
 /// Template for all things in the editor
 abstract class SketchThing {
   /// Drawing priority (lower is higher priority).
@@ -30,5 +45,14 @@ abstract class SketchThing {
   void draw(SketchAPI sketch);
 
   /// Return point that is closest to [to].
-  Tuple2<Vector2, int> closestPoint(Vector2 to);
+  MagnetPoint attract(Vector2 to);
+}
+
+/// Common class for grid lines and line segments for easier intersection.
+abstract class LineThing implements SketchThing {
+  /// Get ray in the position and direction of this line.
+  Ray2 get ray;
+
+  /// For a given intersection point on the ray, check if it is on this line.
+  bool containsIntersection(Vector2 point);
 }

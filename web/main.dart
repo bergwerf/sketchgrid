@@ -13,10 +13,7 @@ final tools = {
   SketchTool.line: 'Line'
 };
 
-final gridlineTypes = {
-  'Single': GridlineType.single,
-  'Repeat': GridlineType.repeat
-};
+final gridlineRuler = {'Normal': false, 'Ruler': true};
 
 final gridlineConstraints = {
   'Two points': GridlineConstraint.twoPoints,
@@ -68,7 +65,7 @@ void main() {
   setupMenu(
       querySelector('#gridline-type'),
       querySelector('#gridline-type + ul'),
-      gridlineTypes,
+      gridlineRuler,
       gridlineIsOn.stream,
       (type) {});
   setupMenu(

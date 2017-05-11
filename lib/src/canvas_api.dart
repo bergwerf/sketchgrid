@@ -22,9 +22,9 @@ class CanvasAPI implements SketchAPI {
   num get unitScale => transformation.entry(0, 0);
 
   /// Get transformed vector.
-  Vector2 _transform(Vector2 v) {
+  Vector2 _transform(Vector2 v, [bool round = true]) {
     final v3 = transformation.transform(vec3(v.x, v.y, 1.0));
-    return vec2(v3.x.roundToDouble(), v3.y.roundToDouble());
+    return round ? vec2(v3.x.roundToDouble(), v3.y.roundToDouble()) : v3.xy;
   }
 
   /// Apply given [style].
@@ -57,7 +57,7 @@ class CanvasAPI implements SketchAPI {
     final r = pointHighlightR * unitScale;
 
     ctx.beginPath();
-    ctx.arc(c.x + .5, c.y + .5, r, 0, 2 * PI);
+    ctx.arc(c.x, c.y, r, 0, 2 * PI);
     ctx.closePath();
     ctx.fill();
   }

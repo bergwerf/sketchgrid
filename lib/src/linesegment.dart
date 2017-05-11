@@ -4,10 +4,13 @@
 
 part of sketchgrid;
 
-class LineSegmentThing implements SketchThing {
+class LineSegment implements LineThing {
   final Vector2 from, to;
 
-  LineSegmentThing(this.from, this.to);
+  LineSegment(this.from, this.to);
+
+  @override
+  Ray2 get ray => new Ray2.fromTo(from, to);
 
   @override
   int get drawPriority => 1;
@@ -18,19 +21,34 @@ class LineSegmentThing implements SketchThing {
   }
 
   @override
-  Tuple2<Vector2, int> closestPoint(Vector2 target) {
+  MagnetPoint attract(Vector2 target) {
+    // Check if target is close enough to [from] or [to].
+    final fromDistance = target.distanceTo(from);
+    if (fromDistance < MagnetPoint.strongMagnetDistance) {
+      return new MagnetPoint(from, fromDistance, MagnetPoint.priorityHigh);
+    }
+    final toDistance = target.distanceTo(to);
+    if (toDistance < MagnetPoint.strongMagnetDistance) {
+      return new MagnetPoint(to, toDistance, MagnetPoint.priorityHigh);
+    }
+
     // Get vector from line start to [to].
     final relTo = target - from;
 
     // Project [relTo] on ray.
     final proj = from + vectorProjection(relTo, to - from);
 
-    if (new Aabb2.centerAndHalfExtents(
-            (from + to) / 2.0, ((to - from) / 2.0)..absolute())
-        .containsVector2(proj)) {
-      return new Tuple2<Vector2, int>(proj, 0);
+    final distance = proj.distanceTo(target);
+    if (bbox.containsVector2(proj) && distance < MagnetPoint.magnetDistance) {
+      return new MagnetPoint(proj, distance, MagnetPoint.priorityNormal);
     } else {
       return null;
     }
   }
+
+  @override
+  bool containsIntersection(point) => bbox.containsVector2(point);
+
+  Aabb2 get bbox => new Aabb2.centerAndHalfExtents(
+      (from + to) / 2.0, ((to - from) / 2.0)..absolute());
 }
