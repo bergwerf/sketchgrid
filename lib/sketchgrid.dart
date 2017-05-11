@@ -126,6 +126,29 @@ class SketchGrid {
     return vec2(v3.x, v3.y);
   }
 
+  /// Get attraction points for the given [cursor] point.
+  List<Tuple2<MagnetPoint, int>> getAttractionPoints(Vector2 cursor) {
+    final m = new List<Tuple2<MagnetPoint, int>>();
+    for (var i = 0; i < things.length; i++) {
+      final magnet = things[i].attract(cursor);
+      if (magnet != null) {
+        m.add(new Tuple2<MagnetPoint, int>(magnet, i));
+      }
+    }
+
+    m.sort((a, b) {
+      if (a.item1.priority < b.item1.priority) {
+        return -1;
+      } else if (a.item1.priority > b.item1.priority) {
+        return 1;
+      } else {
+        return a.item1.cursorDistance - b.item1.cursorDistance;
+      }
+    });
+
+    return m;
+  }
+
   void onMouseMove(MouseEvent e) {
     final cursor = getPointer(e);
 
@@ -144,21 +167,9 @@ class SketchGrid {
     if (minInter != null && minInter.item1 < MagnetPoint.strongMagnetDistance) {
       hoveredPoint = inter[minInter.item2];
     } else {
-      // Get all magnet points.
-      final m = things.map((t) => t.attract(cursor)).toList();
-      m.removeWhere((p) => p == null);
-      m.sort((a, b) {
-        if (a.priority < b.priority) {
-          return -1;
-        } else if (a.priority > b.priority) {
-          return 1;
-        } else {
-          return a.cursorDistance - b.cursorDistance;
-        }
-      });
-
+      final m = getAttractionPoints(cursor);
       if (m.isNotEmpty) {
-        hoveredPoint = m.first.point;
+        hoveredPoint = m.first.item1.point;
       } else {
         hoveredPoint = cursor;
       }
@@ -170,7 +181,13 @@ class SketchGrid {
   void onMouseDown(MouseEvent e) {
     e.preventDefault();
     if (e.button == 2) {
-      tool.points.clear();
+      final m = getAttractionPoints(getPointer(e));
+      if (m.isNotEmpty) {
+        things.removeAt(m.first.item2);
+      } else {
+        tool.points.clear();
+      }
+
       redraw();
     }
   }
