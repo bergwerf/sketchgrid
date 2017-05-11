@@ -15,6 +15,7 @@ part 'src/ray.dart';
 part 'src/abstracts.dart';
 part 'src/canvas_api.dart';
 part 'src/gridline.dart';
+part 'src/linesegment.dart';
 
 enum SketchTool { line, arc, gridline }
 
@@ -32,9 +33,16 @@ class SketchGrid {
   /// Target point for selection
   Vector2 target;
 
+  /// Active tool
+  var tool = SketchTool.line;
+
+  /// Clicked target points
+  final storedTargets = new List<Vector2>();
+
   SketchGrid(this.canvas) {
     // Setup event listening.
     canvas.onMouseMove.listen(onMouseMove);
+    canvas.onMouseUp.listen(onMouseUp);
 
     // Setup drawing.
     ctx = canvas.getContext('2d');
@@ -42,8 +50,8 @@ class SketchGrid {
     resize();
 
     things
-      ..add(new GridlineThing(new Ray2(vec2(0, 0), vec2(1, 0)), true, 1))
-      ..add(new GridlineThing(new Ray2(vec2(0, 0), vec2(0, 1)), true, 1));
+      ..add(new GridlineThing(new Ray2(vec2(0, 0), vec2(1, 0)), true, .7))
+      ..add(new GridlineThing(new Ray2(vec2(0, 0), vec2(0, 1)), true, .7));
   }
 
   void resize() {
@@ -80,6 +88,7 @@ class SketchGrid {
 
     // Draw all things.
     final api = new CanvasAPI(ctx, transformation, vec2(w, h), defaultStyles);
+    things.sort((a, b) => b.drawPriority - a.drawPriority);
     for (final thing in things) {
       thing.draw(api);
     }
@@ -87,6 +96,10 @@ class SketchGrid {
     // Draw target point.
     if (target != null) {
       api.drawPointHighlight(target);
+    }
+
+    for (final point in storedTargets) {
+      api.drawPointHighlight(point);
     }
   }
 
@@ -118,6 +131,7 @@ class SketchGrid {
 
     // Get all closest points and get closest one.
     final points = things.map((t) => t.closestPoint(cursor)).toList();
+    points.removeWhere((p) => p == null);
 
     // Get closest point.
     var targetIdx = -1;
@@ -134,22 +148,48 @@ class SketchGrid {
     // intersection between the two origin curves. If there turns out to be no
     // intersection, keep trying the other points etc.
     if (targetIdx != -1) {
+      var targetIsIntersection = false;
       target = points[targetIdx].item1;
 
       for (var i = 0; i < points.length; i++) {
         if (i == targetIdx) {
           continue;
         }
-        if (target.distanceTo(points[i].item1) < 0.2) {
+        if (target.distanceTo(points[i].item1) < 0.3) {
           final intersect = thingIntersection(things[targetIdx],
               points[targetIdx].item2, things[i], points[i].item2, cursor);
-          if (intersect != null) {
+          if (intersect != null &&
+              ((!targetIsIntersection &&
+                      intersect.distanceToSquared(cursor) < 0.3) ||
+                  intersect.distanceToSquared(cursor) <
+                      target.distanceToSquared(cursor))) {
             target = intersect;
+            targetIsIntersection = true;
           }
         }
       }
     }
 
     redraw();
+  }
+
+  void onMouseUp(MouseEvent e) {
+    if (target != null) {
+      storedTargets.add(target);
+
+      if (storedTargets.length > 1) {
+        final from = storedTargets.removeLast(),
+            to = storedTargets.removeLast();
+
+        if (tool == SketchTool.line) {
+          things.add(new LineSegmentThing(from, to));
+        } else if (tool == SketchTool.gridline) {
+          final ray = new Ray2.fromTo(from, to);
+          things.add(new GridlineThing(ray));
+        }
+
+        redraw();
+      }
+    }
   }
 }

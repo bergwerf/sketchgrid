@@ -7,7 +7,12 @@ part of sketchgrid;
 /// 2D ray + utils
 class Ray2 {
   final Vector2 origin, direction;
+
   Ray2(this.origin, this.direction);
+
+  factory Ray2.fromTo(Vector2 from, Vector2 to) {
+    return new Ray2(from, to - from);
+  }
 
   Tuple2<Vector2, Vector2> intersectAabb(Aabb2 aabb) {
     final result = new List<Vector2>();

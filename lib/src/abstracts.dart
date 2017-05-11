@@ -23,6 +23,9 @@ abstract class SketchAPI {
 
 /// Template for all things in the editor
 abstract class SketchThing {
+  /// Drawing priority (lower is higher priority).
+  int get drawPriority;
+
   /// Draw the thing.
   void draw(SketchAPI sketch);
 

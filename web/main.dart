@@ -38,7 +38,7 @@ void main() {
   final gridlineIsOn = new StreamController<bool>.broadcast();
 
   // Setup canvas.
-  new SketchGrid(querySelector('#sketcharea'));
+  final sketch = new SketchGrid(querySelector('#sketcharea'));
 
   // Get tool container.
   final toolset = querySelector('.sketchgrid-toolset');
@@ -46,6 +46,7 @@ void main() {
   // Tool button handling.
   final buttons = new Map<SketchTool, ButtonElement>();
   final setTool = (SketchTool tool) {
+    sketch.tool = tool;
     gridlineIsOn.add(tool == SketchTool.gridline);
     buttons.values.forEach((btn) => btn.classes.removeAll(selectedToolStyle));
     buttons[tool].classes.addAll(selectedToolStyle);

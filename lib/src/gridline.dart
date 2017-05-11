@@ -23,6 +23,9 @@ class GridlineThing implements SketchThing {
 
   GridlineThing(this.ray, [this.repeat = false, this.distance = 0]);
 
+  @override
+  int get drawPriority => 2;
+
   /// Get perpendicular ray direction.
   Vector2 perpendicular() {
     // <a b>*<x y> = 0 --> ax + by = 0, x + by = 0, b = -x/y
@@ -36,7 +39,7 @@ class GridlineThing implements SketchThing {
   void draw(sk) {
     var proj = sk.projEdge(ray);
     if (proj != null) {
-      sk.drawLine(proj.item1, proj.item2, 'gridline');
+      sk.drawLine(proj.item1, proj.item2, 'grid');
     }
     if (repeat && distance > 0) {
       final extend = perpendicular();
@@ -47,7 +50,7 @@ class GridlineThing implements SketchThing {
           proj = sk.projEdge(ray.translate(extend * (distance * offset)));
 
           if (proj != null) {
-            sk.drawLine(proj.item1, proj.item2, 'gridline');
+            sk.drawLine(proj.item1, proj.item2, 'grid');
           } else {
             break;
           }
@@ -70,7 +73,7 @@ class GridlineThing implements SketchThing {
       final offsetV = perpendicular();
       final normalDirection = (to - proj).angleToSigned(offsetV).abs() < 1;
       final index = normalDirection ? offset : -offset;
-      final target = proj + offsetV * index.toDouble();
+      final target = proj + offsetV * (distance * index.toDouble());
       return new Tuple2<Vector2, int>(target, index);
     } else {
       return new Tuple2<Vector2, int>(proj, 0);
@@ -79,7 +82,8 @@ class GridlineThing implements SketchThing {
 
   /// Get ray at [i].
   Ray2 getRay(int i) {
-    return new Ray2(ray.origin + perpendicular() * i.toDouble(), ray.direction);
+    return new Ray2(
+        ray.origin + perpendicular() * (distance * i), ray.direction);
   }
 }
 
@@ -91,6 +95,6 @@ Vector2 thingIntersection(
     // Compute intersection.
     return a.getRay(aIdx).intersectRay(b.getRay(bIdx));
   } else {
-    throw new UnimplementedError('thing not implemented');
+    return null;
   }
 }

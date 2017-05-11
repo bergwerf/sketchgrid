@@ -7,8 +7,7 @@ part of sketchgrid;
 /// Default styles.
 final defaultStyles = {
   'pen': new SketchStyle(0.04, Colors.black),
-  'gridline': new SketchStyle(0.02, Colors.lightGray),
-  'highlight': new SketchStyle(0.04, Colors.red)
+  'grid': new SketchStyle(0.02, Colors.lightGray)
 };
 
 class CanvasAPI implements SketchAPI {
@@ -53,13 +52,14 @@ class CanvasAPI implements SketchAPI {
 
   @override
   void drawPointHighlight(Vector2 point) {
-    _drawPath('highlight', () {
-      final c = _transform(point);
-      final r = pointHighlightR * unitScale;
+    ctx.fillStyle = 'red';
+    final c = _transform(point);
+    final r = pointHighlightR * unitScale;
 
-      // Lets just not talk about why we add <1/2, 1/2> for now.
-      ctx.arc(c.x + .5, c.y + .5, r, 0, 2 * PI);
-    });
+    ctx.beginPath();
+    ctx.arc(c.x + .5, c.y + .5, r, 0, 2 * PI);
+    ctx.closePath();
+    ctx.fill();
   }
 
   @override
