@@ -22,16 +22,6 @@ class LineSegment implements LineThing {
 
   @override
   MagnetPoint attract(Vector2 target) {
-    // Check if target is close enough to [from] or [to].
-    final fromDistance = target.distanceTo(from);
-    if (fromDistance < MagnetPoint.strongMagnetDistance) {
-      return new MagnetPoint(from, fromDistance, MagnetPoint.priorityHigh);
-    }
-    final toDistance = target.distanceTo(to);
-    if (toDistance < MagnetPoint.strongMagnetDistance) {
-      return new MagnetPoint(to, toDistance, MagnetPoint.priorityHigh);
-    }
-
     // Get vector from line start to [to].
     final relTo = target - from;
 
@@ -48,6 +38,11 @@ class LineSegment implements LineThing {
 
   @override
   bool containsIntersection(point) => bbox.containsVector2(point);
+
+  @override
+  List<Vector2> specialPoints() {
+    return [from, to];
+  }
 
   Aabb2 get bbox => getLineBBox(from, to);
 }

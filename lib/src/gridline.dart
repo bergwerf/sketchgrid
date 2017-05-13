@@ -70,4 +70,7 @@ class GridLine implements LineThing {
 
   @override
   bool containsIntersection(point) => true;
+
+  @override
+  List<Vector2> specialPoints() => [];
 }

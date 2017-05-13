@@ -148,6 +148,16 @@ class SketchGrid {
   List<Tuple2<MagnetPoint, int>> getAttractionPoints(Vector2 cursor) {
     final m = new List<Tuple2<MagnetPoint, int>>();
     for (var i = 0; i < things.length; i++) {
+      final specialPoints = things[i].specialPoints();
+      for (final point in specialPoints) {
+        final distance = point.distanceTo(cursor);
+        if (distance < MagnetPoint.strongMagnetDistance) {
+          final mg = new MagnetPoint(point, distance, MagnetPoint.priorityHigh);
+          m.add(new Tuple2<MagnetPoint, int>(mg, i));
+          continue;
+        }
+      }
+
       final magnet = things[i].attract(cursor);
       if (magnet != null) {
         m.add(new Tuple2<MagnetPoint, int>(magnet, i));

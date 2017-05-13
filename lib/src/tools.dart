@@ -69,6 +69,7 @@ class EllipticCurveTool extends SketchTool<EllipticCurve> {
     } else {
       // Ellipse
       // See: https://math.stackexchange.com/questions/2068583/
+      // TODO: Move all algorithms to ellipse_math.dart
       if (points.length < 3 || points.length == 3 && permanent && isSegment) {
         return null;
       }

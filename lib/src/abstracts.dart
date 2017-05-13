@@ -46,6 +46,10 @@ abstract class SketchThing {
 
   /// Return point that is closest to [to].
   MagnetPoint attract(Vector2 to);
+
+  /// Return some special points in this thing that attract from
+  /// [MagnetPoint.strongMagnetDistance].
+  List<Vector2> specialPoints();
 }
 
 /// Common class for grid lines and line segments for easier intersection.
@@ -60,7 +64,7 @@ abstract class LineThing implements SketchThing {
 class ToolPoint {
   final Vector2 v;
   final bool isSticked;
-  ToolPoint(this.v, this.isSticked);
+  ToolPoint(Vector2 v, this.isSticked) : v = v.clone();
 }
 
 /// Sketch tool interface

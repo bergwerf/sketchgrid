@@ -24,4 +24,9 @@ class EllipticCurve implements SketchThing {
     // TODO: Implement curve, center, begin/endpoint attraction.
     return null;
   }
+
+  @override
+  List<Vector2> specialPoints() {
+    return [center];
+  }
 }
