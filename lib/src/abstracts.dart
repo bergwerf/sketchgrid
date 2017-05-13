@@ -17,8 +17,8 @@ abstract class SketchAPI {
   Tuple2<Vector2, Vector2> projEdge(Ray2 ray);
   void drawPointHighlight(Vector2 point);
   void drawLine(Vector2 from, Vector2 to, String style, [bool exact]);
-  void drawArc(
-      Vector2 center, num radius, num startAngle, num endAngle, String style);
+  void drawEllipse(Vector2 center, Vector2 radius, num rotation, num startAngle,
+      num endAngle, String style);
 }
 
 /// Magnet point for event handling
@@ -68,7 +68,7 @@ abstract class SketchTool<T extends SketchThing> {
   final points = new List<ToolPoint>();
 
   /// Get a sketchthing from the given points.
-  T createThing(List<ToolPoint> points, bool remove);
+  T createThing(List<ToolPoint> points, bool permanent);
 
   /// Draw any tool related stuff.
   void draw(SketchAPI sk, ToolPoint hoveredPoint) {

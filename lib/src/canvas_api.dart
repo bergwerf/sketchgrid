@@ -35,23 +35,27 @@ class CanvasAPI implements SketchAPI {
     ctx.strokeStyle = rgba(style.strokeColor);
   }
 
-  void _drawPath(String style, void draw()) {
+  void _drawPath(String style, void draw(), [bool closed = true]) {
     _applyStyle(styles[style]);
+
     ctx.beginPath();
     draw();
-    ctx.closePath();
+    if (closed) {
+      ctx.closePath();
+    }
+
     ctx.stroke();
   }
 
   @override
-  Tuple2<Vector2, Vector2> projEdge(Ray2 ray) {
+  Tuple2<Vector2, Vector2> projEdge(ray) {
     final rwh = wh / unitScale;
     final bbox = new Aabb2.centerAndHalfExtents(vec2(0, 0), rwh / 2.0);
     return ray.intersectAabb(bbox);
   }
 
   @override
-  void drawPointHighlight(Vector2 point) {
+  void drawPointHighlight(point) {
     ctx.fillStyle = 'red';
     final c = _transform(point);
     final r = pointHighlightR * unitScale;
@@ -63,7 +67,7 @@ class CanvasAPI implements SketchAPI {
   }
 
   @override
-  void drawLine(Vector2 from, Vector2 to, String style, [bool exact = false]) {
+  void drawLine(from, to, style, [bool exact = false]) {
     _drawPath(style, () {
       final _from = _transform(from, !exact), _to = _transform(to, !exact);
 
@@ -85,12 +89,12 @@ class CanvasAPI implements SketchAPI {
   }
 
   @override
-  void drawArc(
-      Vector2 center, num radius, num startAngle, num endAngle, String style) {
+  void drawEllipse(center, radius, rotation, startAngle, endAngle, style) {
     _drawPath(style, () {
       final _center = _transform(center);
-      ctx.arc(_center.x, _center.y, (radius * unitScale).round(), startAngle,
-          endAngle);
-    });
+      final _radius = radius * unitScale;
+      ctx.ellipse(_center.x, _center.y, _radius.x, _radius.y, -rotation,
+          -startAngle, -endAngle, true);
+    }, false);
   }
 }

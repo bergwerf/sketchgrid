@@ -16,7 +16,8 @@ part 'src/ray.dart';
 part 'src/abstracts.dart';
 part 'src/canvas_api.dart';
 part 'src/gridline.dart';
-part 'src/linesegment.dart';
+part 'src/line_segment.dart';
+part 'src/elliptic_curve.dart';
 part 'src/intersections.dart';
 part 'src/tools.dart';
 
@@ -38,10 +39,11 @@ class SketchGrid {
   ToolPoint hoveredPoint;
 
   /// Active tool
-  SketchTool tool;
+  SketchTool _tool;
 
   SketchGrid(this.canvas) {
     // Setup event listening.
+    // TODO: Esc to clear tool points.
     canvas.onMouseMove.listen(onMouseMove);
     canvas.onMouseDown.listen(onMouseDown);
     canvas.onMouseUp.listen(onMouseUp);
@@ -55,6 +57,12 @@ class SketchGrid {
     ctx = canvas.getContext('2d');
     window.onResize.listen((_) => resize());
     resize();
+  }
+
+  set tool(SketchTool replace) {
+    _tool = replace;
+    _tool.points.clear();
+    redraw();
   }
 
   void resize() {
@@ -96,8 +104,8 @@ class SketchGrid {
       thing.draw(sk);
     }
 
-    if (tool != null) {
-      tool.draw(sk, hoveredPoint);
+    if (_tool != null) {
+      _tool.draw(sk, hoveredPoint);
     }
   }
 
@@ -169,6 +177,7 @@ class SketchGrid {
     if (minInter != null && minInter.item1 < MagnetPoint.strongMagnetDistance) {
       hoveredPoint = new ToolPoint(_inter[minInter.item2], true);
     } else {
+      // TODO: Attract towards X/Y position of existing points.
       final m = getAttractionPoints(cursor);
       if (m.isNotEmpty) {
         hoveredPoint = new ToolPoint(m.first.item1.point, true);
@@ -190,8 +199,8 @@ class SketchGrid {
         return things[a.item2].drawPriority - things[b.item2].drawPriority;
       });
 
-      if (tool.points.isNotEmpty) {
-        tool.points.clear();
+      if (_tool.points.isNotEmpty) {
+        _tool.points.clear();
       } else if (m.isNotEmpty) {
         things.removeAt(m.first.item2);
       }
@@ -203,8 +212,8 @@ class SketchGrid {
   void onMouseUp(MouseEvent e) {
     e.preventDefault();
     if (e.button == 0) {
-      if (hoveredPoint != null && tool != null) {
-        tool.addPoint(hoveredPoint, things);
+      if (hoveredPoint != null && _tool != null) {
+        _tool.addPoint(hoveredPoint, things);
         _inter = computeAllIntersections();
         redraw();
       }

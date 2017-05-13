@@ -36,7 +36,7 @@ class LineSegment implements LineThing {
     final relTo = target - from;
 
     // Project [relTo] on ray.
-    final proj = from + vectorProjection(relTo, to - from);
+    final proj = from + vec2Projection(relTo, to - from);
 
     final distance = proj.distanceTo(target);
     if (bbox.containsVector2(proj) && distance < MagnetPoint.magnetDistance) {

@@ -8,15 +8,18 @@ import 'dart:async';
 import 'package:sketchgrid/sketchgrid.dart';
 
 final lineSegmentTool = new LineSegmentTool();
+final ellipseTool = new EllipticCurveTool();
 final gridLineTool = new GridLineTool();
 
-enum SketchToolType { linesegment, gridline }
+enum SketchToolType { linesegment, ellipse, gridline }
 final toolButtons = {
   SketchToolType.linesegment: 'Line',
+  SketchToolType.ellipse: 'Arc',
   SketchToolType.gridline: 'Gridline'
 };
 final tools = {
   SketchToolType.linesegment: lineSegmentTool,
+  SketchToolType.ellipse: ellipseTool,
   SketchToolType.gridline: gridLineTool
 };
 
@@ -27,6 +30,7 @@ final gridLineConstraints = {
   'Vertical': GridlineConstraint.vertical,
   'Parallel': GridlineConstraint.parallel,
   'Perpendicular': GridlineConstraint.perpendicular,
+  'Bisect': GridlineConstraint.bisect,
   'Single tangent': GridlineConstraint.singleTangent,
   'Double tangent': GridlineConstraint.doubleTangent
 };
@@ -50,7 +54,6 @@ void main() {
   final buttons = new Map<SketchToolType, ButtonElement>();
   final setTool = (SketchToolType tool) {
     sketch.tool = tools[tool];
-    sketch.tool.points.clear();
     gridLineIsOn.add(tool == SketchToolType.gridline);
     buttons.values.forEach((btn) => btn.classes.removeAll(selectedToolStyle));
     buttons[tool].classes.addAll(selectedToolStyle);

@@ -84,6 +84,6 @@ class Ray2 {
 
   /// Project [point] on ray.
   Vector2 project(Vector2 point) {
-    return origin + vectorProjection(point - origin, direction);
+    return origin + vec2Projection(point - origin, direction);
   }
 }

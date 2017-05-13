@@ -4,37 +4,120 @@
 
 part of sketchgrid;
 
+/// Stick [point] angle relative to [center] to some common values.
+/// TODO: Stick to angle relative to parent line?
+void _stickAngle(ToolPoint center, ToolPoint point) {
+  final rel = point.v - center.v;
+  final a = vec2Angle(rel);
+
+  const angleStickThreshold = .3;
+  const stickingAngles = const [
+    // 0, 1 / 6, 1 / 4, 2 / 6, 2 / 4, 4 / 6, 3 / 4, 5 / 6, 1,
+    // -1 / 6, -1 / 4, -2 / 6, -2 / 4, -4 / 6, -3 / 4, -5 / 6, -1
+    -1, -1 / 2, 0, 1 / 2, 1
+  ];
+
+  final margin = angleStickThreshold / rel.length;
+  for (final _stickAngle in stickingAngles) {
+    final stickAngle = _stickAngle * PI;
+    if (isAlmost(a, stickAngle, margin)) {
+      final direction = vec2(cos(stickAngle), sin(stickAngle));
+      point.v.setFrom(center.v + direction * rel.length);
+      break;
+    }
+  }
+}
+
 class LineSegmentTool extends SketchTool<LineSegment> {
   @override
-  LineSegment createThing(points, remove) {
-    final pts = getNPoints(2, points, remove);
-
-    // If the second point is not sticked, clamp it to one of the exact angles:
-    // 0, 1/6, 1/2, 1/3, 1, ...
-    // If within deviation of 0.2 rad.
+  LineSegment createThing(points, permanent) {
+    final pts = getNPoints(2, points, permanent);
     if (!pts[1].isSticked) {
-      final rel = pts[1].v - pts[0].v;
-      final a = vec2Angle(rel);
-
-      const angleStickThreshold = .3;
-      const stickingAngles = const [
-        // 0, 1 / 6, 1 / 4, 2 / 6, 2 / 4, 4 / 6, 3 / 4, 5 / 6, 1,
-        // -1 / 6, -1 / 4, -2 / 6, -2 / 4, -4 / 6, -3 / 4, -5 / 6, -1
-        -1, -1 / 2, 0, 1 / 2, 1
-      ];
-
-      final margin = angleStickThreshold / rel.length;
-      for (final _stickAngle in stickingAngles) {
-        final stickAngle = _stickAngle * PI;
-        if (isAlmost(a, stickAngle, margin)) {
-          final direction = vec2(cos(stickAngle), sin(stickAngle));
-          pts[1].v.setFrom(pts[0].v + direction * rel.length);
-          break;
-        }
-      }
+      _stickAngle(pts[0], pts[1]);
     }
 
     return new LineSegment(pts[0].v, pts[1].v);
+  }
+}
+
+class EllipticCurveTool extends SketchTool<EllipticCurve> {
+  bool isCircle = false;
+  bool isSegment = true;
+
+  @override
+  EllipticCurve createThing(points, permanent) {
+    if (isCircle || (points.length == 2 && !permanent)) {
+      if (points.length < 2 || points.length == 2 && permanent && isSegment) {
+        return null;
+      }
+
+      final pts = getNPoints(points.length, points, permanent);
+      _stickAngle(pts[0], pts[1]);
+
+      final c = pts[0].v;
+      final r = c.distanceTo(pts[1].v);
+      final startAngle = vec2AnglePositive(pts[1].v - c);
+      var endAngle = startAngle + 2 * PI;
+
+      if (pts.length == 3) {
+        _stickAngle(pts[0], pts[2]);
+        endAngle = vec2AnglePositive(pts[2].v - c);
+        pts[2].v.setFrom(c + vec2(cos(endAngle), sin(endAngle)) * r);
+      }
+
+      return new EllipticCurve(c, new Vector2.all(r), 0, startAngle, endAngle);
+    } else {
+      // Ellipse
+      // See: https://math.stackexchange.com/questions/2068583/
+      if (points.length < 3 || points.length == 3 && permanent && isSegment) {
+        return null;
+      }
+
+      final pts = getNPoints(points.length, points, permanent);
+
+      final c = pts[0].v;
+      final v1 = pts[1].v - c;
+      final v2 = pts[2].v - c;
+
+      final a = v1.length;
+      final b = (v2 - vec2Projection(v2, v1)).length;
+      final shear = (v2.angleToSigned(v1) - PI / 2) % PI;
+
+      // Do not create invisible ellipses.
+      if (a == 0 || b == 0) {
+        return null;
+      }
+
+      // This is needed to prevent exceptions.
+      if (shear == 0) {
+        return new EllipticCurve(c, vec2(a, b), vec2Angle(v1), 0, 2 * PI);
+      }
+
+      final A = 1 / pow(a, 2);
+      final B = 2 * -tan(shear) / pow(a, 2);
+      final C = 1 / pow(b, 2) + pow(tan(shear), 2) / pow(a, 2);
+      final y1 = 1 / 2 * (A + C - sqrt(pow(A + C, 2) + pow(B, 2) - 4 * A * C));
+      final y2 = 1 / 2 * (A + C + sqrt(pow(A + C, 2) + pow(B, 2) - 4 * A * C));
+      final aa = sqrt(1 / y1);
+      final bb = sqrt(1 / y2);
+      final ev1 = vec2(A - C - sqrt(pow(A + C, 2) + pow(B, 2) - 4 * A * C), B);
+      final rot = vec2Angle(v1) + vec2Angle(ev1);
+
+      final rMat = new Matrix2.identity()..setRotation(rot);
+      final rMatInv = rMat.clone()..invert();
+      final xyc = vec2(1 / aa, 1 / bb); // XY correction
+      final sv = rMatInv.transform(pts[2].v - c)..multiply(xyc);
+      final startAngle = vec2AnglePositive(sv);
+      var endAngle = startAngle + 2 * PI;
+
+      if (pts.length == 4) {
+        final ev = rMatInv.transform(pts[3].v - c)..multiply(xyc);
+        endAngle = vec2AnglePositive(ev);
+        pts[3].v.setFrom(c + rMat.transform(vec2FromAngle(endAngle, aa, bb)));
+      }
+
+      return new EllipticCurve(c, vec2(aa, bb), rot, startAngle, endAngle);
+    }
   }
 }
 
@@ -44,6 +127,7 @@ enum GridlineConstraint {
   vertical,
   parallel,
   perpendicular,
+  bisect,
   singleTangent,
   doubleTangent
 }
@@ -53,28 +137,36 @@ class GridLineTool extends SketchTool<GridLine> {
   var constraint = GridlineConstraint.twoPoints;
 
   @override
-  GridLine createThing(points, remove) {
+  GridLine createThing(points, permanent) {
     switch (constraint) {
       case GridlineConstraint.twoPoints:
-        final pts = getNPoints(2, points, remove);
+        final pts = getNPoints(2, points, permanent);
         return new GridLine(new Ray2.fromTo(pts[0].v, pts[1].v), ruler);
 
       case GridlineConstraint.horizontal:
-        final pts = getNPoints(1, points, remove);
+        final pts = getNPoints(1, points, permanent);
         return new GridLine(new Ray2(pts[0].v, vec2(1, 0)), ruler);
 
       case GridlineConstraint.vertical:
-        final pts = getNPoints(1, points, remove);
+        final pts = getNPoints(1, points, permanent);
         return new GridLine(new Ray2(pts[0].v, vec2(0, 1)), ruler);
 
       case GridlineConstraint.parallel:
-        final pts = getNPoints(3, points, remove);
+        final pts = getNPoints(3, points, permanent);
         return new GridLine(new Ray2(pts[2].v, pts[1].v - pts[0].v));
 
       case GridlineConstraint.perpendicular:
-        final pts = getNPoints(2, points, remove);
+        // TODO: Implement 3 point perpendicular constraint.
+        final pts = getNPoints(2, points, permanent);
         final direction = vec2Perpendicular(pts[1].v - pts[0].v);
         return new GridLine(new Ray2(pts[1].v, direction));
+
+      case GridlineConstraint.bisect:
+        final pts = getNPoints(3, points, permanent);
+        final o = pts[0].v;
+        final v1 = pts[1].v - o, v2 = pts[2].v - o;
+        final angle = (vec2Angle(v1) + vec2Angle(v2)) / 2;
+        return new GridLine(new Ray2(o, vec2FromAngle(angle)));
 
       default:
         return null;

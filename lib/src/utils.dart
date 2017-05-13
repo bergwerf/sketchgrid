@@ -17,11 +17,6 @@ String rgba(Vector4 c) => [
       ',${c.a})'
     ].join();
 
-/// Compute vector projection of [a] on [v].
-Vector2 vectorProjection(Vector2 a, Vector2 v) {
-  return (v / v.length) * (a.dot(v) / v.length);
-}
-
 /// Get bounding box around line between [from] and [to].
 Aabb2 getLineBBox(Vector2 from, Vector2 to) {
   final extents = ((to - from) / 2.0)..absolute();
@@ -43,9 +38,20 @@ List<T> getNPoints<T>(int n, List<T> list, bool remove) {
   }
 }
 
+/// Compute vector projection of [a] on [v].
+Vector2 vec2Projection(Vector2 a, Vector2 v) {
+  return (v / v.length) * (a.dot(v) / v.length);
+}
+
 /// Get angle of [vector] relative to origin.
 num vec2Angle(Vector2 vector) {
   return atan2(vector.y, vector.x);
+}
+
+/// Get angle of [vector] relative to origin such that the angle is in {0 2PI}.
+num vec2AnglePositive(Vector2 vector) {
+  final a = vec2Angle(vector);
+  return a < 0 ? a + 2 * PI : a;
 }
 
 /// Get unit vector that is perpendicular to [vector].
@@ -57,6 +63,11 @@ Vector2 vec2Perpendicular(Vector2 vector) {
     final v = vec2(1, -vector.x / vector.y);
     return v / v.length;
   }
+}
+
+/// Generate unit vector from [angle] with [xScale] and [yScale].
+Vector2 vec2FromAngle(num angle, [num xScale = 1, num yScale = 1]) {
+  return vec2(xScale * cos(angle), yScale * sin(angle));
 }
 
 /// Check if [value] is almost equal to [compare] by [margin].
