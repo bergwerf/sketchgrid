@@ -48,6 +48,17 @@ num vec2Angle(Vector2 vector) {
   return atan2(vector.y, vector.x);
 }
 
+/// Get unit vector that is perpendicular to [vector].
+Vector2 vec2Perpendicular(Vector2 vector) {
+// <a b>*<x y> = 0 --> ax + by = 0, x + by = 0, b = -x/y
+  if (vector.y == 0) {
+    return vec2(0, 1);
+  } else {
+    final v = vec2(1, -vector.x / vector.y);
+    return v / v.length;
+  }
+}
+
 /// Check if [value] is almost equal to [compare] by [margin].
 bool isAlmost(num value, num compare, num margin) {
   return value > compare - margin && value < compare + margin;

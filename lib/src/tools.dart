@@ -67,6 +67,15 @@ class GridLineTool extends SketchTool<GridLine> {
         final pts = getNPoints(1, points, remove);
         return new GridLine(new Ray2(pts[0].v, vec2(0, 1)), ruler);
 
+      case GridlineConstraint.parallel:
+        final pts = getNPoints(3, points, remove);
+        return new GridLine(new Ray2(pts[2].v, pts[1].v - pts[0].v));
+
+      case GridlineConstraint.perpendicular:
+        final pts = getNPoints(2, points, remove);
+        final direction = vec2Perpendicular(pts[1].v - pts[0].v);
+        return new GridLine(new Ray2(pts[1].v, direction));
+
       default:
         return null;
     }

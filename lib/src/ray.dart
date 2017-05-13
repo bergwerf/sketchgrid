@@ -77,17 +77,6 @@ class Ray2 {
     return new Ray2(origin + translation, direction);
   }
 
-  /// Get perpendicular unit vector in ray direction.
-  Vector2 perpendicular() {
-    // <a b>*<x y> = 0 --> ax + by = 0, x + by = 0, b = -x/y
-    if (direction.y == 0) {
-      return vec2(0, 1);
-    } else {
-      final v = vec2(1, -direction.x / direction.y);
-      return v / v.length;
-    }
-  }
-
   /// Get point at [distance] from origin.
   Vector2 at(num distance) {
     return origin + direction * distance;

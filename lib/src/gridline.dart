@@ -24,7 +24,7 @@ class GridLine implements LineThing {
     }
     if (ruler) {
       final bbox = getLineBBox(proj.item1, proj.item2);
-      final o = ray.perpendicular() * 0.1;
+      final o = vec2Perpendicular(ray.direction) * 0.1;
 
       // Draw ruler indicators.
       var v = ray.origin.clone();
