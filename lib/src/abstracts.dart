@@ -57,17 +57,23 @@ abstract class LineThing implements SketchThing {
   bool containsIntersection(Vector2 point);
 }
 
+class ToolPoint {
+  final Vector2 v;
+  final bool isSticked;
+  ToolPoint(this.v, this.isSticked);
+}
+
 /// Sketch tool interface
 abstract class SketchTool<T extends SketchThing> {
-  final points = new List<Vector2>();
+  final points = new List<ToolPoint>();
 
   /// Get a sketchthing from the given points.
-  T createThing(List<Vector2> points, bool remove);
+  T createThing(List<ToolPoint> points, bool remove);
 
   /// Draw any tool related stuff.
-  void draw(SketchAPI sk, Vector2 hoveredPoint) {
+  void draw(SketchAPI sk, ToolPoint hoveredPoint) {
     // Collect list of all points.
-    final allPoints = new List<Vector2>.from(points);
+    final allPoints = new List<ToolPoint>.from(points);
     if (hoveredPoint != null) {
       allPoints.add(hoveredPoint);
     }
@@ -82,12 +88,12 @@ abstract class SketchTool<T extends SketchThing> {
       // This is a bit of a hack, but it makes other code simpler.
     } finally {
       // Draw all points.
-      allPoints.forEach((v) => sk.drawPointHighlight(v));
+      allPoints.forEach((p) => sk.drawPointHighlight(p.v));
     }
   }
 
   /// The user clicked a point.
-  void addPoint(Vector2 point, List<SketchThing> things) {
+  void addPoint(ToolPoint point, List<SketchThing> things) {
     points.add(point);
     try {
       final thing = createThing(points, true);

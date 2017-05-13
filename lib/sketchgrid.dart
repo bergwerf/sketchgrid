@@ -31,8 +31,11 @@ class SketchGrid {
   bool scheduledRedraw = false;
   num gridSize = 11;
 
+  /// Cached version of all intersections.
+  List<Vector2> _inter = [];
+
   /// Hovered point
-  Vector2 hoveredPoint;
+  ToolPoint hoveredPoint;
 
   /// Active tool
   SketchTool tool;
@@ -91,11 +94,6 @@ class SketchGrid {
     things.sort((a, b) => b.drawPriority - a.drawPriority);
     for (final thing in things) {
       thing.draw(sk);
-    }
-
-    // Draw target point.
-    if (hoveredPoint != null) {
-      sk.drawPointHighlight(hoveredPoint);
     }
 
     if (tool != null) {
@@ -164,21 +162,18 @@ class SketchGrid {
   void onMouseMove(MouseEvent e) {
     final cursor = getPointer(e);
 
-    // Compute all intersections.
-    final inter = computeAllIntersections();
-
     // Check if any intersection is within magnet distance.
-    final interDistance = new List<Tuple2<num, int>>.generate(inter.length,
-        (i) => new Tuple2<num, int>(inter[i].distanceTo(cursor), i)).toList();
+    final interDistance = new List<Tuple2<num, int>>.generate(_inter.length,
+        (i) => new Tuple2<num, int>(_inter[i].distanceTo(cursor), i)).toList();
     final minInter = minBy(interDistance, (e) => e.item1);
     if (minInter != null && minInter.item1 < MagnetPoint.strongMagnetDistance) {
-      hoveredPoint = inter[minInter.item2];
+      hoveredPoint = new ToolPoint(_inter[minInter.item2], true);
     } else {
       final m = getAttractionPoints(cursor);
       if (m.isNotEmpty) {
-        hoveredPoint = m.first.item1.point;
+        hoveredPoint = new ToolPoint(m.first.item1.point, true);
       } else {
-        hoveredPoint = cursor;
+        hoveredPoint = new ToolPoint(cursor, false);
       }
     }
 
@@ -189,10 +184,16 @@ class SketchGrid {
     e.preventDefault();
     if (e.button == 2) {
       final m = getAttractionPoints(getPointer(e));
-      if (m.isNotEmpty) {
-        things.removeAt(m.first.item2);
-      } else {
+
+      // Sort [m] by [SketchThing.drawPriority].
+      m.sort((a, b) {
+        return things[a.item2].drawPriority - things[b.item2].drawPriority;
+      });
+
+      if (tool.points.isNotEmpty) {
         tool.points.clear();
+      } else if (m.isNotEmpty) {
+        things.removeAt(m.first.item2);
       }
 
       redraw();
@@ -204,6 +205,7 @@ class SketchGrid {
     if (e.button == 0) {
       if (hoveredPoint != null && tool != null) {
         tool.addPoint(hoveredPoint, things);
+        _inter = computeAllIntersections();
         redraw();
       }
     }

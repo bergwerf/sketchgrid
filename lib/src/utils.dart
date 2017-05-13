@@ -42,3 +42,13 @@ List<T> getNPoints<T>(int n, List<T> list, bool remove) {
     return new List<T>.generate(n, (i) => list[list.length - n + i]);
   }
 }
+
+/// Get angle of [vector] relative to origin.
+num vec2Angle(Vector2 vector) {
+  return atan2(vector.y, vector.x);
+}
+
+/// Check if [value] is almost equal to [compare] by [margin].
+bool isAlmost(num value, num compare, num margin) {
+  return value > compare - margin && value < compare + margin;
+}
