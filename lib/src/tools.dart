@@ -37,7 +37,7 @@ class LineSegmentTool extends SketchTool<LineSegment> {
       final a = permanent ? points.removeAt(0) : points.first;
       final b = permanent && !path ? points.removeLast() : points.last;
 
-      if (!a.isSticked) {
+      if (!b.isSticked) {
         _stickAngle(a, b);
       }
 
@@ -135,10 +135,9 @@ enum RulerConstraint {
   horizontal,
   vertical,
   parallel,
+  midline,
   perpendicular,
-  bisect,
-  singleTangent,
-  doubleTangent
+  bisect
 }
 
 class RayRulerTool extends SketchTool<RayRuler> {
@@ -164,8 +163,12 @@ class RayRulerTool extends SketchTool<RayRuler> {
         final pts = getNPoints(3, points, permanent);
         return new RayRuler(new Ray2(pts[2].v, pts[1].v - pts[0].v));
 
+      case RulerConstraint.midline:
+        final pts = getNPoints(3, points, permanent);
+        return new RayRuler(new Ray2(
+            pts[0].v + (pts[2].v - pts[0].v) / 2.0, pts[1].v - pts[0].v));
+
       case RulerConstraint.perpendicular:
-        // TODO: Implement 3 point perpendicular constraint.
         final pts = getNPoints(3, points, permanent);
         final direction = vec2Perpendicular(pts[1].v - pts[0].v);
         return new RayRuler(new Ray2(pts[2].v, direction));

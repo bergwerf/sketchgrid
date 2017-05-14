@@ -6,19 +6,11 @@ import 'dart:html';
 import 'dart:async';
 
 import 'package:sketchgrid/sketchgrid.dart';
-
 import 'widgets.dart';
 
 final lineTool = new LineSegmentTool();
 final curveTool = new EllipticCurveTool();
 final rulerTool = new RayRulerTool();
-
-enum SketchToolType { linesegment, ellipse, gridline }
-final toolButtons = {
-  SketchToolType.linesegment: 'Line',
-  SketchToolType.ellipse: 'Arc',
-  SketchToolType.gridline: 'Gridline'
-};
 
 void setRaised(ButtonElement btn) {
   const style = const ['mdl-button--raised', 'tool-selected'];
@@ -77,6 +69,7 @@ void main() {
       new MenuItem('Horizontal', RulerConstraint.horizontal, [8, 1]),
       new MenuItem('Vertical', RulerConstraint.vertical, [9, 1]),
       new MenuItem('Parallel', RulerConstraint.parallel, [0, 0]),
+      new MenuItem('Midline', RulerConstraint.midline, [3, 0]),
       new MenuItem('Perpendicular', RulerConstraint.perpendicular, [1, 0]),
       new MenuItem('Bisect', RulerConstraint.bisect, [2, 0])
     ], handle: (data) {
@@ -95,25 +88,5 @@ void main() {
 
     sketch = new SketchGrid(querySelector('#sketcharea'));
     sketch.tool = rulerTool;
-  });
-}
-
-void setupMenu<T>(ButtonElement button, UListElement ul, Map<String, T> values,
-    Stream<bool> activate, void callback(T value)) {
-  activate.listen((v) {
-    button.disabled = !v;
-  });
-
-  final buttonLabel = new SpanElement()..text = values.keys.first;
-  button.children.insert(0, buttonLabel);
-
-  values.forEach((key, value) {
-    ul.append(new LIElement()
-      ..classes.add('mdl-menu__item')
-      ..text = key
-      ..onClick.listen((_) {
-        buttonLabel.text = key;
-        callback(value);
-      }));
   });
 }
