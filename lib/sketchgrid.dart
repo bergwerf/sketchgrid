@@ -13,6 +13,7 @@ import 'package:vector_math/vector_math.dart';
 
 part 'src/utils.dart';
 part 'src/ray.dart';
+part 'src/ellipse_math.dart';
 part 'src/abstracts.dart';
 part 'src/canvas_api.dart';
 part 'src/ray_ruler.dart';

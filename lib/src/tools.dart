@@ -48,8 +48,8 @@ class LineSegmentTool extends SketchTool<LineSegment> {
 }
 
 class EllipticCurveTool extends SketchTool<EllipticCurve> {
-  bool isCircle = true;
-  bool isSegment = false;
+  bool isCircle = false;
+  bool isSegment = true;
 
   @override
   EllipticCurve createThing(points, permanent) {
@@ -101,14 +101,18 @@ class EllipticCurveTool extends SketchTool<EllipticCurve> {
         return new EllipticCurve(c, vec2(a, b), vec2Angle(v1), 0, 2 * PI);
       }
 
-      final A = 1 / pow(a, 2);
-      final B = 2 * -tan(shear) / pow(a, 2);
-      final C = 1 / pow(b, 2) + pow(tan(shear), 2) / pow(a, 2);
-      final y1 = 1 / 2 * (A + C - sqrt(pow(A + C, 2) + pow(B, 2) - 4 * A * C));
-      final y2 = 1 / 2 * (A + C + sqrt(pow(A + C, 2) + pow(B, 2) - 4 * A * C));
+      final A = 1 / pow2(a);
+      final B = 2 *
+          -tan(shear) /
+          pow2(
+            a,
+          );
+      final C = 1 / pow2(b) + pow2(tan(shear)) / pow2(a);
+      final y1 = 1 / 2 * (A + C - sqrt(pow2(A + C) + pow2(B) - 4 * A * C));
+      final y2 = 1 / 2 * (A + C + sqrt(pow2(A + C) + pow2(B) - 4 * A * C));
       final aa = sqrt(1 / y1);
       final bb = sqrt(1 / y2);
-      final ev1 = vec2(A - C - sqrt(pow(A + C, 2) + pow(B, 2) - 4 * A * C), B);
+      final ev1 = vec2(A - C - sqrt(pow2(A + C) + pow2(B) - 4 * A * C), B);
       final rot = vec2Angle(v1) + vec2Angle(ev1);
 
       final rMat = new Matrix2.identity()..setRotation(rot);

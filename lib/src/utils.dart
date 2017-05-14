@@ -4,10 +4,13 @@
 
 part of sketchgrid;
 
-/// Shortcut for 2D vector.
+/// Shortcut for pow([x], 2)
+num pow2(num x) => pow(x, 2);
+
+/// Shortcut for 2D vector
 Vector2 vec2(num x, num y) => new Vector2(x, y);
 
-/// Shortcut for 3D vector.
+/// Shortcut for 3D vector
 Vector3 vec3(num x, num y, num z) => new Vector3(x, y, z);
 
 /// Color vector to rgba string.
@@ -25,22 +28,14 @@ Aabb2 getLineBBox(Vector2 from, Vector2 to) {
   return bbox;
 }
 
-/// Get last [n] points from [list]. Also remove them if [remove] it true.
-List<T> getNPoints<T>(int n, List<T> list, bool remove) {
-  if (list.length < n) {
-    throw new RangeError('list is too short');
-  }
-
-  if (remove) {
-    return new List<T>.generate(n, (i) => list.removeLast()).reversed.toList();
-  } else {
-    return new List<T>.generate(n, (i) => list[list.length - n + i]);
-  }
+/// Turn [v] into unit vector.
+Vector2 unitVector(Vector2 v) {
+  return v / v.length;
 }
 
 /// Compute vector projection of [a] on [v].
 Vector2 vec2Projection(Vector2 a, Vector2 v) {
-  return (v / v.length) * (a.dot(v) / v.length);
+  return unitVector(v) * (a.dot(v) / v.length);
 }
 
 /// Get angle of [vector] relative to origin.
@@ -61,7 +56,7 @@ Vector2 vec2Perpendicular(Vector2 vector) {
     return vec2(0, 1);
   } else {
     final v = vec2(1, -vector.x / vector.y);
-    return v / v.length;
+    return unitVector(v);
   }
 }
 
@@ -73,4 +68,17 @@ Vector2 vec2FromAngle(num angle, [num xScale = 1, num yScale = 1]) {
 /// Check if [value] is almost equal to [compare] by [margin].
 bool isAlmost(num value, num compare, num margin) {
   return value > compare - margin && value < compare + margin;
+}
+
+/// Get last [n] points from [list]. Also remove them if [remove] it true.
+List<T> getNPoints<T>(int n, List<T> list, bool remove) {
+  if (list.length < n) {
+    throw new RangeError('list is too short');
+  }
+
+  if (remove) {
+    return new List<T>.generate(n, (i) => list.removeLast()).reversed.toList();
+  } else {
+    return new List<T>.generate(n, (i) => list[list.length - n + i]);
+  }
 }

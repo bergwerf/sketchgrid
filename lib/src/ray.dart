@@ -9,7 +9,7 @@ class Ray2 {
   final Vector2 origin, direction;
 
   factory Ray2(Vector2 origin, Vector2 direction) {
-    return new Ray2._(origin, direction / direction.length);
+    return new Ray2._(origin, unitVector(direction));
   }
 
   factory Ray2.fromTo(Vector2 from, Vector2 to) {
