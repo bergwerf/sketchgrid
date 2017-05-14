@@ -29,20 +29,28 @@ void _stickAngle(ToolPoint center, ToolPoint point) {
 }
 
 class LineSegmentTool extends SketchTool<LineSegment> {
+  bool path = false;
+
   @override
   LineSegment createThing(points, permanent) {
-    final pts = getNPoints(2, points, permanent);
-    if (!pts[1].isSticked) {
-      _stickAngle(pts[0], pts[1]);
-    }
+    if (points.length == 2) {
+      final a = permanent ? points.removeAt(0) : points.first;
+      final b = permanent && !path ? points.removeLast() : points.last;
 
-    return new LineSegment(pts[0].v, pts[1].v);
+      if (!a.isSticked) {
+        _stickAngle(a, b);
+      }
+
+      return new LineSegment(a.v.clone(), b.v.clone());
+    } else {
+      return null;
+    }
   }
 }
 
 class EllipticCurveTool extends SketchTool<EllipticCurve> {
-  bool isCircle = false;
-  bool isSegment = true;
+  bool isCircle = true;
+  bool isSegment = false;
 
   @override
   EllipticCurve createThing(points, permanent) {
@@ -122,7 +130,7 @@ class EllipticCurveTool extends SketchTool<EllipticCurve> {
   }
 }
 
-enum GridlineConstraint {
+enum RulerConstraint {
   twoPoints,
   horizontal,
   vertical,
@@ -133,41 +141,41 @@ enum GridlineConstraint {
   doubleTangent
 }
 
-class GridLineTool extends SketchTool<GridLine> {
+class RayRulerTool extends SketchTool<RayRuler> {
   var ruler = false;
-  var constraint = GridlineConstraint.twoPoints;
+  var constraint = RulerConstraint.twoPoints;
 
   @override
-  GridLine createThing(points, permanent) {
+  RayRuler createThing(points, permanent) {
     switch (constraint) {
-      case GridlineConstraint.twoPoints:
+      case RulerConstraint.twoPoints:
         final pts = getNPoints(2, points, permanent);
-        return new GridLine(new Ray2.fromTo(pts[0].v, pts[1].v), ruler);
+        return new RayRuler(new Ray2.fromTo(pts[0].v, pts[1].v), ruler);
 
-      case GridlineConstraint.horizontal:
+      case RulerConstraint.horizontal:
         final pts = getNPoints(1, points, permanent);
-        return new GridLine(new Ray2(pts[0].v, vec2(1, 0)), ruler);
+        return new RayRuler(new Ray2(pts[0].v, vec2(1, 0)), ruler);
 
-      case GridlineConstraint.vertical:
+      case RulerConstraint.vertical:
         final pts = getNPoints(1, points, permanent);
-        return new GridLine(new Ray2(pts[0].v, vec2(0, 1)), ruler);
+        return new RayRuler(new Ray2(pts[0].v, vec2(0, 1)), ruler);
 
-      case GridlineConstraint.parallel:
+      case RulerConstraint.parallel:
         final pts = getNPoints(3, points, permanent);
-        return new GridLine(new Ray2(pts[2].v, pts[1].v - pts[0].v));
+        return new RayRuler(new Ray2(pts[2].v, pts[1].v - pts[0].v));
 
-      case GridlineConstraint.perpendicular:
+      case RulerConstraint.perpendicular:
         // TODO: Implement 3 point perpendicular constraint.
-        final pts = getNPoints(2, points, permanent);
+        final pts = getNPoints(3, points, permanent);
         final direction = vec2Perpendicular(pts[1].v - pts[0].v);
-        return new GridLine(new Ray2(pts[1].v, direction));
+        return new RayRuler(new Ray2(pts[2].v, direction));
 
-      case GridlineConstraint.bisect:
+      case RulerConstraint.bisect:
         final pts = getNPoints(3, points, permanent);
         final o = pts[0].v;
         final v1 = pts[1].v - o, v2 = pts[2].v - o;
         final angle = (vec2Angle(v1) + vec2Angle(v2)) / 2;
-        return new GridLine(new Ray2(o, vec2FromAngle(angle)));
+        return new RayRuler(new Ray2(o, vec2FromAngle(angle)));
 
       default:
         return null;

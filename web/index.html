@@ -4,30 +4,14 @@
     <title>SketchGrid demo</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <link rel="stylesheet" href="styles/main.css">
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
   </head>
   <body>
     <div class="sketchgrid-container">
-      <div class="sketchgrid-toolset">
-        <button id="gridline-type"
-            class="dropdown mdl-button mdl-js-button mdl-js-ripple-effect">
-          <i class="material-icons">arrow_drop_down</i>
-        </button>
-        <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect"
-            for="gridline-type">
-        </ul>
-        <button id="gridline-constraint"
-            class="dropdown mdl-button mdl-js-button mdl-js-ripple-effect">
-          <i class="material-icons">arrow_drop_down</i>
-        </button>
-        <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect"
-            for="gridline-constraint">
-        </ul>
-        <button id="btn-clear" class="mdl-button mdl-js-button mdl-js-ripple-effect">Clear grid</button>
-      </div>
+      <div id="toolbox"></div>
       <canvas id="sketcharea" class="sketchgrid-canvas"></canvas>
     </div>
 

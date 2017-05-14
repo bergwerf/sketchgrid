@@ -4,14 +4,14 @@
 
 part of sketchgrid;
 
-class GridLine implements LineThing {
+class RayRuler implements LineThing {
   @override
   final Ray2 ray;
 
   final bool ruler;
   final num stepSize;
 
-  GridLine(this.ray, [this.ruler = false, this.stepSize = 1]);
+  RayRuler(this.ray, [this.ruler = false, this.stepSize = 1]);
 
   @override
   int get drawPriority => 2;

@@ -7,9 +7,11 @@ import 'dart:async';
 
 import 'package:sketchgrid/sketchgrid.dart';
 
-final lineSegmentTool = new LineSegmentTool();
-final ellipseTool = new EllipticCurveTool();
-final gridLineTool = new GridLineTool();
+import 'widgets.dart';
+
+final lineTool = new LineSegmentTool();
+final curveTool = new EllipticCurveTool();
+final rulerTool = new RayRulerTool();
 
 enum SketchToolType { linesegment, ellipse, gridline }
 final toolButtons = {
@@ -17,78 +19,83 @@ final toolButtons = {
   SketchToolType.ellipse: 'Arc',
   SketchToolType.gridline: 'Gridline'
 };
-final tools = {
-  SketchToolType.linesegment: lineSegmentTool,
-  SketchToolType.ellipse: ellipseTool,
-  SketchToolType.gridline: gridLineTool
-};
 
-final gridLineRuler = {'Normal': false, 'Ruler': true};
-final gridLineConstraints = {
-  'Two points': GridlineConstraint.twoPoints,
-  'Horizontal': GridlineConstraint.horizontal,
-  'Vertical': GridlineConstraint.vertical,
-  'Parallel': GridlineConstraint.parallel,
-  'Perpendicular': GridlineConstraint.perpendicular,
-  'Bisect': GridlineConstraint.bisect,
-  'Single tangent': GridlineConstraint.singleTangent,
-  'Double tangent': GridlineConstraint.doubleTangent
-};
+void setRaised(ButtonElement btn) {
+  const style = const ['mdl-button--raised', 'tool-selected'];
+  btn.parent.querySelectorAll('.mdl-button').classes.removeAll(style);
+  btn.classes.addAll(style);
+}
 
 void main() {
-  // CSS styles
-  final buttonStyle = ['mdl-button', 'mdl-js-button', 'mdl-js-ripple-effect'];
-  final selectedToolStyle = ['mdl-button--raised', 'tool-selected'];
+  SketchGrid sketch;
 
-  // Stream that indicates if the gridline tool is selected.
-  // ignore: close_sinks
-  final gridLineIsOn = new StreamController<bool>.broadcast();
+  // Create tabs UI.
+  final tabs = new MaterialTabs();
+  querySelector('#toolbox').append(tabs.node);
 
-  // Setup canvas.
-  final sketch = new SketchGrid(querySelector('#sketcharea'));
+  tabs.addTab('Line', classes: ['sketchgrid-toolbar'], onSelect: () {
+    sketch.tool = lineTool;
+  }, content: [
+    materialButton('Single line', icon: [0, 1], handle: (btn) {
+      setRaised(btn);
+      lineTool.path = false;
+    }),
+    materialButton('Line path', icon: [1, 1], handle: (btn) {
+      setRaised(btn);
+      lineTool.path = true;
+    })
+  ]);
+  setRaised(tabs.parent.children[1].children[0]);
 
-  // Get tool container.
-  final toolset = querySelector('.sketchgrid-toolset');
+  tabs.addTab('Curve', classes: ['sketchgrid-toolbar'], onSelect: () {
+    sketch.tool = curveTool;
+  }, content: [
+    materialButton('Circle', icon: [2, 1], handle: (btn) {
+      setRaised(btn);
+      curveTool.isCircle = true;
+      curveTool.isSegment = false;
+    }),
+    materialButton('Arc', icon: [3, 1], handle: (btn) {
+      setRaised(btn);
+      curveTool.isCircle = true;
+      curveTool.isSegment = true;
+    }),
+    materialButton('Ellipse', icon: [4, 1], handle: (btn) {
+      setRaised(btn);
+      curveTool.isCircle = false;
+      curveTool.isSegment = false;
+    })
+  ]);
+  setRaised(tabs.parent.children[2].children[0]);
 
-  // Tool button handling.
-  final buttons = new Map<SketchToolType, ButtonElement>();
-  final setTool = (SketchToolType tool) {
-    sketch.tool = tools[tool];
-    gridLineIsOn.add(tool == SketchToolType.gridline);
-    buttons.values.forEach((btn) => btn.classes.removeAll(selectedToolStyle));
-    buttons[tool].classes.addAll(selectedToolStyle);
-  };
+  tabs.addTab('Grid', selected: true, classes: ['sketchgrid-toolbar'],
+      onSelect: () {
+    sketch.tool = rulerTool;
+  }, content: [
+    materialMenu('rayruler-constraint', [
+      new MenuItem('Two points', RulerConstraint.twoPoints, [7, 1]),
+      new MenuItem('Horizontal', RulerConstraint.horizontal, [8, 1]),
+      new MenuItem('Vertical', RulerConstraint.vertical, [9, 1]),
+      new MenuItem('Parallel', RulerConstraint.parallel, [0, 0]),
+      new MenuItem('Perpendicular', RulerConstraint.perpendicular, [1, 0]),
+      new MenuItem('Bisect', RulerConstraint.bisect, [2, 0])
+    ], handle: (data) {
+      rulerTool.constraint = data;
+      rulerTool.points.clear();
+    }),
+    materialCheckbox('', icon: [6, 1], handle: (value) {
+      rulerTool.ruler = value;
+    })
+  ]);
 
-  // Create tool buttons.
-  toolButtons.keys.toList().reversed.forEach((key) {
-    final button = new ButtonElement()
-      ..classes.addAll(buttonStyle)
-      ..text = toolButtons[key];
-    button.onClick.listen((_) {
-      setTool(key);
-    });
-    buttons[key] = button;
-    toolset.children.insert(0, button);
+  // Wait with showing to prevent ugly loading behavior.
+  new Timer(new Duration(milliseconds: 500), () {
+    tabs.showTabs();
+    querySelector('#toolbox').style.opacity = '1';
+
+    sketch = new SketchGrid(querySelector('#sketcharea'));
+    sketch.tool = rulerTool;
   });
-
-  // Setup menus.
-  setupMenu(
-      querySelector('#gridline-type'),
-      querySelector('#gridline-type + ul'),
-      gridLineRuler,
-      gridLineIsOn.stream, (isOn) {
-    gridLineTool.ruler = isOn;
-  });
-  setupMenu(
-      querySelector('#gridline-constraint'),
-      querySelector('#gridline-constraint + ul'),
-      gridLineConstraints,
-      gridLineIsOn.stream, (constraint) {
-    gridLineTool.constraint = constraint;
-    gridLineTool.points.clear();
-  });
-
-  setTool(SketchToolType.gridline);
 }
 
 void setupMenu<T>(ButtonElement button, UListElement ul, Map<String, T> values,

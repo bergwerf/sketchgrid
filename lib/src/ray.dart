@@ -47,7 +47,7 @@ class Ray2 {
   }
 
   Vector2 intersectRay(Ray2 other) {
-    if (direction.cross(other.direction) == 0) {
+    if (isAlmost(direction.cross(other.direction), 0, 0.001)) {
       return null;
     } else if (direction.x == 0 && other.direction.y == 0) {
       return vec2(origin.x, other.origin.y);

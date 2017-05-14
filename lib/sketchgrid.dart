@@ -15,7 +15,7 @@ part 'src/utils.dart';
 part 'src/ray.dart';
 part 'src/abstracts.dart';
 part 'src/canvas_api.dart';
-part 'src/gridline.dart';
+part 'src/ray_ruler.dart';
 part 'src/line_segment.dart';
 part 'src/elliptic_curve.dart';
 part 'src/intersections.dart';
@@ -30,7 +30,7 @@ class SketchGrid {
 
   CanvasRenderingContext2D ctx;
   bool scheduledRedraw = false;
-  num gridSize = 11;
+  num gridSize = 16;
 
   /// Cached version of all intersections.
   List<Vector2> _inter = [];
