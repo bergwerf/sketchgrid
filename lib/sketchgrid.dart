@@ -43,7 +43,6 @@ class SketchGrid {
 
   SketchGrid(this.canvas) {
     // Setup event listening.
-    // TODO: Esc to clear tool points.
     canvas.onMouseMove.listen(onMouseMove);
     canvas.onMouseDown.listen(onMouseDown);
     canvas.onMouseUp.listen(onMouseUp);
@@ -51,6 +50,12 @@ class SketchGrid {
     canvas.onMouseLeave.listen((_) {
       hoveredPoint = null;
       redraw();
+    });
+
+    window.onKeyDown.listen((e) {
+      if (e.keyCode == KeyCode.ESC) {
+        _tool.points.clear();
+      }
     });
 
     // Setup drawing.
@@ -187,7 +192,7 @@ class SketchGrid {
     if (minInter != null && minInter.item1 < MagnetPoint.strongMagnetDistance) {
       hoveredPoint = new ToolPoint(_inter[minInter.item2], true);
     } else {
-      // TODO: Attract towards X/Y position of existing points.
+      // TODO: Attract towards X/Y position of existing points?
       final m = getAttractionPoints(cursor);
       if (m.isNotEmpty) {
         hoveredPoint = new ToolPoint(m.first.item1.point, true);

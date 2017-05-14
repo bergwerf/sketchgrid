@@ -21,7 +21,7 @@ class EllipticCurve implements SketchThing {
 
   @override
   MagnetPoint attract(Vector2 target) {
-    // TODO: Implement curve, center, begin/endpoint attraction.
+    // TODO: Implement curve attraction.
     return null;
   }
 

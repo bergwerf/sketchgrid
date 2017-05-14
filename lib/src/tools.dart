@@ -5,7 +5,6 @@
 part of sketchgrid;
 
 /// Stick [point] angle relative to [center] to some common values.
-/// TODO: Stick to angle relative to parent line?
 void _stickAngle(ToolPoint center, ToolPoint point) {
   final rel = point.v - center.v;
   final a = vec2Angle(rel);
