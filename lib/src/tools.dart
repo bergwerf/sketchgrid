@@ -40,7 +40,11 @@ class LineSegmentTool extends SketchTool<LineSegment> {
         _stickAngle(a, b);
       }
 
-      return new LineSegment(a.v.clone(), b.v.clone());
+      if (a.v.distanceTo(b.v) < 0.01) {
+        return null;
+      } else {
+        return new LineSegment(a.v.clone(), b.v.clone());
+      }
     } else {
       return null;
     }
@@ -59,8 +63,6 @@ class EllipticCurveTool extends SketchTool<EllipticCurve> {
       }
 
       final pts = getNPoints(points.length, points, permanent);
-      _stickAngle(pts[0], pts[1]);
-
       final c = pts[0].v;
       final r = c.distanceTo(pts[1].v);
       final startAngle = vec2AnglePositive(pts[1].v - c);
@@ -72,7 +74,13 @@ class EllipticCurveTool extends SketchTool<EllipticCurve> {
         pts[2].v.setFrom(c + vec2(cos(endAngle), sin(endAngle)) * r);
       }
 
-      return new EllipticCurve(c, new Vector2.all(r), 0, startAngle, endAngle);
+      // TODO: refactor
+      if (!angleIsBetween(startAngle + 0.01, startAngle, endAngle)) {
+        return null;
+      } else {
+        return new EllipticCurve(
+            c, new Vector2.all(r), 0, startAngle, endAngle);
+      }
     } else {
       // Ellipse
       // See: https://math.stackexchange.com/questions/2068583/
@@ -128,7 +136,12 @@ class EllipticCurveTool extends SketchTool<EllipticCurve> {
         pts[3].v.setFrom(c + rMat.transform(vec2FromAngle(endAngle, aa, bb)));
       }
 
-      return new EllipticCurve(c, vec2(aa, bb), rot, startAngle, endAngle);
+      // TODO: refactor
+      if (!angleIsBetween(startAngle + 0.01, startAngle, endAngle)) {
+        return null;
+      } else {
+        return new EllipticCurve(c, vec2(aa, bb), rot, startAngle, endAngle);
+      }
     }
   }
 }

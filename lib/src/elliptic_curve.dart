@@ -40,7 +40,7 @@ class EllipticCurve implements SketchThing {
   @override
   List<Vector2> specialPoints() {
     if ((endAngle - startAngle).abs() < 2 * PI - 0.001) {
-      // TODO: refactor.
+      // TODO: refactor
       final startPoint =
           vec2(radius.x * cos(startAngle), radius.y * sin(startAngle));
       final endPoint = vec2(radius.x * cos(endAngle), radius.y * sin(endAngle));
