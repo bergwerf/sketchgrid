@@ -2,7 +2,7 @@ name:           sketchgrid
 version:        0.0.0
 author:         Herman Bergwerf <hermanbergwerf@gmail.com>
 description:    Sketcher for technical illustrations.
-homepage:       https://github.com/eqdb/sketchgrid
+homepage:       https://github.com/hermanbergwerf/sketchgrid
 environment:
   sdk:          '>=1.8.0 <2.0.0'
 dependencies:
