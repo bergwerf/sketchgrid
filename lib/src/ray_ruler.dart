@@ -41,9 +41,9 @@ class RayRuler implements LineThing {
   }
 
   @override
-  MagnetPoint attract(Vector2 target) {
-    // Project target on ray.
-    final proj = ray.project(target);
+  MagnetPoint attract(Vector2 cursor) {
+    // Project cursor on ray.
+    final proj = ray.project(cursor);
 
     // If this is a ruler, check if the projection is close enough to an
     // indicator.
@@ -53,19 +53,14 @@ class RayRuler implements LineThing {
           ((proj - ray.origin).angleToSigned(ray.direction).abs() < 1 ? 1 : -1);
 
       final v = ray.at(idx * stepSize);
-      final vDist = v.distanceTo(target);
-      if (vDist < MagnetPoint.strongMagnetDistance) {
-        return new MagnetPoint(v, vDist, MagnetPoint.priorityHigh);
+      final vDist = v.distanceTo(cursor);
+      if (vDist < MagnetPoint.magnetAttraction['strong']) {
+        return new MagnetPoint(v, vDist, priority: 'high');
       }
     }
 
-    // Check if the point is close enough.
-    final distance = proj.distanceTo(target);
-    if (distance < MagnetPoint.magnetDistance) {
-      return new MagnetPoint(proj, distance, MagnetPoint.priorityNormal);
-    } else {
-      return null;
-    }
+    return new MagnetPoint.compute(proj, cursor,
+        attraction: 'average', priority: 'normal');
   }
 
   @override

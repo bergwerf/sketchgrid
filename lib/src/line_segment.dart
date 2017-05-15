@@ -21,19 +21,17 @@ class LineSegment implements LineThing {
   }
 
   @override
-  MagnetPoint attract(Vector2 target) {
+  MagnetPoint attract(Vector2 cursor) {
     // Get vector from line start to [to].
-    final relTo = target - from;
+    final relCursor = cursor - from;
 
-    // Project [relTo] on ray.
-    final proj = from + vec2Projection(relTo, to - from);
+    // Project [relCursor] on ray.
+    final proj = from + vec2Projection(relCursor, to - from);
 
-    final distance = proj.distanceTo(target);
-    if (bbox.containsVector2(proj) && distance < MagnetPoint.magnetDistance) {
-      return new MagnetPoint(proj, distance, MagnetPoint.priorityNormal);
-    } else {
-      return null;
-    }
+    return bbox.containsVector2(proj)
+        ? new MagnetPoint.compute(proj, cursor,
+            attraction: 'average', priority: 'normal')
+        : null;
   }
 
   @override

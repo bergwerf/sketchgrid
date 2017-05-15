@@ -20,10 +20,10 @@ class EllipticCurve implements SketchThing {
   }
 
   @override
-  MagnetPoint attract(Vector2 target) {
+  MagnetPoint attract(Vector2 cursor) {
     // TODO: create ellipse class that handles transformations etc.
     final mRot = new Matrix2.identity()..setRotation(-rotation);
-    final relTarget = mRot.transform(target - center);
+    final relTarget = mRot.transform(cursor - center);
     final relPoint = ellipseSectionClosestPoint(relTarget, radius.x, radius.y,
         startAngle - rotation, endAngle - rotation);
 
@@ -33,14 +33,8 @@ class EllipticCurve implements SketchThing {
 
     // Transform back.
     mRot.invert();
-    final point = mRot.transform(relPoint) + center;
-    final distance = point.distanceTo(target);
-
-    if (distance < MagnetPoint.magnetDistance) {
-      return new MagnetPoint(point, distance, MagnetPoint.priorityNormal);
-    } else {
-      return null;
-    }
+    return new MagnetPoint.compute(mRot.transform(relPoint) + center, cursor,
+        priority: 'normal', attraction: 'average');
   }
 
   @override

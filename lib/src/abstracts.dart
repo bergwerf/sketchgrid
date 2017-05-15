@@ -22,19 +22,26 @@ abstract class SketchAPI {
 }
 
 /// Magnet point for event handling
-/// TODO: rename to SnapPoint.
 class MagnetPoint {
-  static num magnetDistance = 0.2;
-  static num strongMagnetDistance = 0.3;
-
-  static const priorityNormal = 2;
-  static const priorityHigh = 1;
+  static const magnetPriority = const {'normal': 2, 'high': 1};
+  static const magnetAttraction = const {'average': .2, 'strong': .3};
 
   final Vector2 point;
   final num cursorDistance;
   final int priority;
 
-  MagnetPoint(this.point, this.cursorDistance, this.priority);
+  MagnetPoint(this.point, this.cursorDistance, {String priority: 'normal'})
+      : priority = magnetPriority[priority];
+
+  factory MagnetPoint.compute(Vector2 point, Vector2 cursor,
+      {String priority: 'normal', String attraction: 'average'}) {
+    final distanceValue = cursor.distanceTo(point);
+    if (distanceValue <= magnetAttraction[attraction]) {
+      return new MagnetPoint(point, distanceValue, priority: priority);
+    } else {
+      return null;
+    }
+  }
 }
 
 /// Template for all things in the editor
@@ -45,12 +52,10 @@ abstract class SketchThing {
   /// Draw the thing.
   void draw(SketchAPI sketch);
 
-  /// Return point that is closest to [to].
-  /// TODO: rename to snap
-  MagnetPoint attract(Vector2 to);
+  /// Return point that is closest to [cursor].
+  MagnetPoint attract(Vector2 cursor);
 
-  /// Return some special points in this thing that attract from
-  /// [MagnetPoint.strongMagnetDistance].
+  /// Return some special points in this thing with high attraction.
   List<Vector2> specialPoints();
 }
 

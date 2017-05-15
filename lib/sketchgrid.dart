@@ -150,23 +150,28 @@ class SketchGrid {
     return intersections;
   }
 
-  /// Get attraction points for the given [cursor] point.
-  List<Tuple2<MagnetPoint, int>> getAttractionPoints(Vector2 cursor) {
+  /// Run and store [computeAllIntersections].
+  void recomputeIntersections() {
+    _inter = computeAllIntersections();
+  }
+
+  /// Get all attraction points for the given [cursor].
+  List<Tuple2<MagnetPoint, int>> attractCursor(Vector2 cursor) {
     final m = new List<Tuple2<MagnetPoint, int>>();
     for (var i = 0; i < things.length; i++) {
       final specialPoints = things[i].specialPoints();
       for (final point in specialPoints) {
         final distance = point.distanceTo(cursor);
-        if (distance < MagnetPoint.strongMagnetDistance) {
-          final mg = new MagnetPoint(point, distance, MagnetPoint.priorityHigh);
+        if (distance < MagnetPoint.magnetAttraction['strong']) {
+          final mg = new MagnetPoint(point, distance, priority: 'high');
           m.add(new Tuple2<MagnetPoint, int>(mg, i));
           continue;
         }
       }
 
-      final magnet = things[i].attract(cursor);
-      if (magnet != null) {
-        m.add(new Tuple2<MagnetPoint, int>(magnet, i));
+      final aPoint = things[i].attract(cursor);
+      if (aPoint != null) {
+        m.add(new Tuple2<MagnetPoint, int>(aPoint, i));
       }
     }
 
@@ -190,13 +195,14 @@ class SketchGrid {
     final interDistance = new List<Tuple2<num, int>>.generate(_inter.length,
         (i) => new Tuple2<num, int>(_inter[i].distanceTo(cursor), i)).toList();
     final minInter = minBy(interDistance, (e) => e.item1);
-    if (minInter != null && minInter.item1 < MagnetPoint.strongMagnetDistance) {
+    if (minInter != null &&
+        minInter.item1 < MagnetPoint.magnetAttraction['strong']) {
       hoveredPoint = new ToolPoint(_inter[minInter.item2], true);
     } else {
       // TODO: Attract towards X/Y position of existing points?
-      final m = getAttractionPoints(cursor);
-      if (m.isNotEmpty) {
-        hoveredPoint = new ToolPoint(m.first.item1.point, true);
+      final aPoints = attractCursor(cursor);
+      if (aPoints.isNotEmpty) {
+        hoveredPoint = new ToolPoint(aPoints.first.item1.point, true);
       } else {
         hoveredPoint = new ToolPoint(cursor, false);
       }
@@ -208,17 +214,18 @@ class SketchGrid {
   void onMouseDown(MouseEvent e) {
     e.preventDefault();
     if (e.button == 2) {
-      final m = getAttractionPoints(getPointer(e));
-
-      // Sort [m] by [SketchThing.drawPriority].
-      m.sort((a, b) {
-        return things[a.item2].drawPriority - things[b.item2].drawPriority;
-      });
+      final snapPoints = attractCursor(getPointer(e));
 
       if (_tool.points.isNotEmpty) {
         _tool.points.clear();
-      } else if (m.isNotEmpty) {
-        things.removeAt(m.first.item2);
+      } else if (snapPoints.isNotEmpty) {
+        // Sort [snapPoints] by [SketchThing.drawPriority].
+        snapPoints.sort((a, b) {
+          return things[a.item2].drawPriority - things[b.item2].drawPriority;
+        });
+
+        things.removeAt(snapPoints.first.item2);
+        recomputeIntersections();
       }
 
       redraw();
@@ -230,7 +237,7 @@ class SketchGrid {
     if (e.button == 0) {
       if (hoveredPoint != null && _tool != null) {
         _tool.addPoint(hoveredPoint, things);
-        _inter = computeAllIntersections();
+        recomputeIntersections();
         redraw();
       }
     }

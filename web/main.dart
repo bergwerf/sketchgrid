@@ -53,16 +53,19 @@ void main() {
       setRaised(btn);
       curveTool.isCircle = true;
       curveTool.isSegment = false;
+      curveTool.points.clear();
     }),
     materialButton('Arc', icon: [3, 1], handle: (btn) {
       setRaised(btn);
       curveTool.isCircle = true;
       curveTool.isSegment = true;
+      curveTool.points.clear();
     }),
     materialButton('Ellipse', icon: [4, 1], handle: (btn) {
       setRaised(btn);
       curveTool.isCircle = false;
       curveTool.isSegment = false;
+      curveTool.points.clear();
     })
   ]);
   setRaised(tabs.parent.children[2].children[0]);
