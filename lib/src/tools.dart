@@ -164,24 +164,26 @@ class RayRulerTool extends SketchTool<RayRuler> {
 
       case RulerConstraint.parallel:
         final pts = getNPoints(3, points, permanent);
-        return new RayRuler(new Ray2(pts[2].v, pts[1].v - pts[0].v));
+        return new RayRuler(new Ray2(pts[2].v, pts[1].v - pts[0].v), ruler);
 
       case RulerConstraint.midline:
         final pts = getNPoints(3, points, permanent);
-        return new RayRuler(new Ray2(
-            pts[0].v + (pts[2].v - pts[0].v) / 2.0, pts[1].v - pts[0].v));
+        return new RayRuler(
+            new Ray2(
+                pts[0].v + (pts[2].v - pts[0].v) / 2.0, pts[1].v - pts[0].v),
+            ruler);
 
       case RulerConstraint.perpendicular:
         final pts = getNPoints(3, points, permanent);
         final direction = vec2Perpendicular(pts[1].v - pts[0].v);
-        return new RayRuler(new Ray2(pts[2].v, direction));
+        return new RayRuler(new Ray2(pts[2].v, direction), ruler);
 
       case RulerConstraint.bisect:
         final pts = getNPoints(3, points, permanent);
         final o = pts[0].v;
         final v1 = pts[1].v - o, v2 = pts[2].v - o;
         final angle = (vec2Angle(v1) + vec2Angle(v2)) / 2;
-        return new RayRuler(new Ray2(o, vec2FromAngle(angle)));
+        return new RayRuler(new Ray2(o, vec2FromAngle(angle)), ruler);
 
       default:
         return null;
