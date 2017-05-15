@@ -4,7 +4,7 @@
 
 import 'dart:html';
 
-import 'utils.dart';
+import 'package:htgen/dynamic.dart' as ht;
 
 class MaterialTabs {
   DivElement parent, tabbar;
@@ -80,16 +80,16 @@ Element materialButton(String label,
   return button;
 }
 
-Element materialCheckbox(String label,
+Element materialCheckbox(String idPrefix, String label,
     {List<int> icon: const [], void handle(bool value)}) {
-  final idPre = label.split(' ').join('-').toLowerCase();
-  final id = '$idPre-checkbox';
-  final checkbox = inputElm('#$id.mdl-checkbox__input', type: 'checkbox');
+  final id = '$idPrefix-checkbox';
+  final checkbox =
+      ht.input('#$id.mdl-checkbox__input', attrs: {'type': 'checkbox'});
   checkbox.onChange.listen((_) => handle(checkbox.checked));
-  return span('', c: [
-    labelElm('.mdl-checkbox.mdl-js-checkbox.mdl-js-ripple-effect', c: [
+  return ht.span([
+    ht.label('.mdl-checkbox.mdl-js-checkbox.mdl-js-ripple-effect', c: [
       checkbox,
-      span('.mdl-checkbox__label')..text = label,
+      ht.span(['.mdl-checkbox__label', label]),
       icon.length == 2 ? _createIcon(icon) : null
     ])
   ]);
@@ -97,17 +97,17 @@ Element materialCheckbox(String label,
 
 Element materialMenu<T>(String id, List<MenuItem<T>> items,
     {void handle(T data)}) {
-  final buttonIcon = new SpanElement();
-  final buttonText = new SpanElement();
+  final buttonIcon = ht.span('');
+  final buttonText = ht.span('');
 
-  return span('', c: [
-    buttonElm('#$id.dropdown.mdl-button.mdl-js-button.mdl-js-ripple-effect',
+  return ht.span([
+    ht.button('#$id.dropdown.mdl-button.mdl-js-button.mdl-js-ripple-effect',
         c: [
           buttonIcon,
           buttonText,
-          span('.material-icons')..text = 'arrow_drop_down'
+          ht.span(['.material-icons', 'arrow_drop_down'])
         ]),
-    ulElm('.mdl-menu.mdl-menu--bottom-left.mdl-js-menu.mdl-js-ripple-effect',
+    ht.ul('.mdl-menu.mdl-menu--bottom-left.mdl-js-menu.mdl-js-ripple-effect',
         c: items.map((item) {
           final setButton = () {
             handle(item.data);
@@ -121,8 +121,8 @@ Element materialMenu<T>(String id, List<MenuItem<T>> items,
             setButton();
           }
 
-          return liElm('.mdl-menu__item',
-              c: [_createIcon(item.icon), span('')..text = item.label])
+          return ht.li('.mdl-menu__item',
+              c: [_createIcon(item.icon), ht.span('')..text = item.label])
             ..onClick.listen((_) => setButton());
         }).toList())
       ..setAttribute('for', id)

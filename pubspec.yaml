@@ -6,6 +6,7 @@ homepage:       https://github.com/hermanbergwerf/sketchgrid
 environment:
   sdk:          '>=1.8.0 <2.0.0'
 dependencies:
+  htgen:        ^0.0.1
   tuple:        ^1.0.1
   collection:   ^1.14.0
   vector_math:  ^2.0.4

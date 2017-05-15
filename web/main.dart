@@ -86,7 +86,7 @@ void main() {
       rulerTool.constraint = data;
       rulerTool.points.clear();
     }),
-    materialCheckbox('', icon: [6, 1], handle: (value) {
+    materialCheckbox('ruler', '', icon: [6, 1], handle: (value) {
       rulerTool.ruler = value;
     })
   ]);
