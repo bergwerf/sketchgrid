@@ -21,6 +21,13 @@ void setRaised(ButtonElement btn) {
 void main() {
   SketchGrid sketch;
 
+  // Defaul tool settings.
+  lineTool.path = false;
+  curveTool.isCircle = true;
+  curveTool.isSegment = false;
+  rulerTool.ruler = false;
+  rulerTool.constraint = RulerConstraint.twoPoints;
+
   // Create tabs UI.
   final tabs = new MaterialTabs();
   querySelector('#toolbox').append(tabs.node);

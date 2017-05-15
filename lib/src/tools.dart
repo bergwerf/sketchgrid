@@ -48,8 +48,8 @@ class LineSegmentTool extends SketchTool<LineSegment> {
 }
 
 class EllipticCurveTool extends SketchTool<EllipticCurve> {
-  bool isCircle = false;
-  bool isSegment = true;
+  bool isCircle = true;
+  bool isSegment = false;
 
   @override
   EllipticCurve createThing(points, permanent) {

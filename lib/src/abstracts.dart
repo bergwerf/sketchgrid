@@ -22,6 +22,7 @@ abstract class SketchAPI {
 }
 
 /// Magnet point for event handling
+/// TODO: rename to SnapPoint.
 class MagnetPoint {
   static num magnetDistance = 0.2;
   static num strongMagnetDistance = 0.3;
@@ -45,6 +46,7 @@ abstract class SketchThing {
   void draw(SketchAPI sketch);
 
   /// Return point that is closest to [to].
+  /// TODO: rename to snap
   MagnetPoint attract(Vector2 to);
 
   /// Return some special points in this thing that attract from
