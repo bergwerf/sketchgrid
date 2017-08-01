@@ -8,6 +8,7 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:tuple/tuple.dart';
+import 'package:euclid/euclid.dart';
 import 'package:collection/collection.dart';
 import 'package:vector_math/vector_math.dart';
 
@@ -65,6 +66,7 @@ class SketchGrid {
     resize();
   }
 
+  SketchTool get tool => _tool;
   set tool(SketchTool replace) {
     _tool = replace;
     _tool.points.clear();
@@ -121,7 +123,7 @@ class SketchGrid {
         ? event.client
         : event is TouchEvent
             ? event.touches.first.client
-            : new Point<num>(0, 0);
+            : const Point<num>(0, 0);
 
     final v = vec2(pointer.x, pointer.y);
     final rect = canvas.getBoundingClientRect();

@@ -4,7 +4,7 @@
 
 part of sketchgrid;
 
-class RayRuler implements LineThing {
+class RayRuler implements RayThing {
   @override
   final Ray2 ray;
 

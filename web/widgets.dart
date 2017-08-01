@@ -49,9 +49,10 @@ class MaterialTabs {
   }
 
   void showTabs() {
-    parent.children
-        .sublist(1)
-        .forEach((elm) => elm.style.removeProperty('display'));
+    // Initial setup.
+    for (final elm in parent.children.sublist(1)) {
+      elm.style.removeProperty('display');
+    }
   }
 }
 
@@ -109,13 +110,13 @@ Element materialMenu<T>(String id, List<MenuItem<T>> items,
         ]),
     ht.ul('.mdl-menu.mdl-menu--bottom-left.mdl-js-menu.mdl-js-ripple-effect',
         c: items.map((item) {
-          final setButton = () {
+          void setButton() {
             handle(item.data);
             buttonText.text = item.label;
             buttonIcon.children
               ..clear()
               ..add(_createIcon(item.icon));
-          };
+          }
 
           if (buttonText.text.isEmpty) {
             setButton();

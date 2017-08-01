@@ -60,7 +60,7 @@ abstract class SketchThing {
 }
 
 /// Common class for grid lines and line segments for easier intersection.
-abstract class LineThing implements SketchThing {
+abstract class RayThing implements SketchThing {
   /// Get ray in the position and direction of this line.
   Ray2 get ray;
 
@@ -95,11 +95,13 @@ abstract class SketchTool<T extends SketchThing> {
       if (preview != null) {
         preview.draw(sk);
       }
-    } catch (e) {
+    } on RangeError {
       // This is a bit of a hack, but it makes other code simpler.
     } finally {
       // Draw all points.
-      allPoints.forEach((p) => sk.drawPointHighlight(p.v));
+      for (final p in allPoints) {
+        sk.drawPointHighlight(p.v);
+      }
     }
   }
 
@@ -111,7 +113,7 @@ abstract class SketchTool<T extends SketchThing> {
       if (thing != null) {
         things.add(thing);
       }
-    } catch (e) {
+    } on RangeError {
       // This is a bit of a hack, but it makes other code simpler.
     }
   }

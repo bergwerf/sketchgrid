@@ -4,7 +4,7 @@
 
 part of sketchgrid;
 
-class LineSegment implements LineThing {
+class LineSegment implements RayThing {
   final Vector2 from, to;
 
   LineSegment(this.from, this.to);

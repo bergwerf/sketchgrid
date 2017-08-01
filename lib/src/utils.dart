@@ -7,12 +7,6 @@ part of sketchgrid;
 /// Shortcut for pow([x], 2)
 num pow2(num x) => pow(x, 2);
 
-/// Shortcut for 2D vector
-Vector2 vec2(num x, num y) => new Vector2(x, y);
-
-/// Shortcut for 3D vector
-Vector3 vec3(num x, num y, num z) => new Vector3(x, y, z);
-
 /// Color vector to rgba string.
 String rgba(Vector4 c) => [
       'rgba(',
