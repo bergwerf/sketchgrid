@@ -15,18 +15,14 @@ List<Vector2> thingIntersection(SketchThing a, SketchThing b) {
   } else if (a is EllipticCurve && b is RayThing ||
       b is EllipticCurve && a is RayThing) {
     // TODO: do not intersect in open parts (transform + measure angle).
-    // TODO: for some reason this is not working nicely.
     final EllipticCurve elipt = a is EllipticCurve ? a : b;
     final RayThing linet = a is EllipticCurve ? b : a;
 
     final elip = createEllipse(elipt.center, elipt.radius, elipt.rotation);
     final line = createLineConic(linet.ray.origin, linet.ray.direction);
+    final out = intersectConics(elip.homogeneousMatrix, line.homogeneousMatrix);
 
-    final result =
-        intersectConics(elip.homogeneousMatrix, line.homogeneousMatrix);
-    print(result);
-
-    for (final v in result) {
+    for (final v in out) {
       if (linet.containsIntersection(v)) {
         list.add(v);
       }
